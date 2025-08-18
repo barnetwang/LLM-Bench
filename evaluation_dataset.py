@@ -61,4 +61,4 @@ def generate_long_text(num_words=1000):
     base_sentence = "這是一個用於測試語言模型長上下文處理能力的句子。 "
     return base_sentence * (num_words // len(base_sentence.split()))
 
-LONG_CONTEXT_PERFORMANCE_PROMPT = generate_long_text() + "根據以上全文，請總結這篇文章的核心觀點。"
+#LONG_CONTEXT_PERFORMANCE_PROMPT = generate_long_text() + "根據以上全文，請總結這篇文章的核心觀點。"

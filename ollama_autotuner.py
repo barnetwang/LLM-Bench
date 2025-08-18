@@ -42,9 +42,9 @@ def select_constraints_by_size(model_name: str):
     model_name = model_data.get('name') or model_data.get('model')
     size_b = get_model_size_in_billions(model_data['details'])
     print(f"偵測到模型 '{model_name}' 的大小約為 {size_b:.2f}B。")
-    chat_constraints = {"name": "小型模型 / 聊天場景", "time_limit_s": 30.0, "ttft_limit_s": 2.0, "hallucination_threshold": 0.95, "num_predict": 128}
-    summary_constraints = {"name": "中型模型 / 摘要場景", "time_limit_s": 120.0, "ttft_limit_s": 6.0, "num_predict": 512, "hallucination_threshold": 1.0}
-    large_model_constraints = {"name": "大型模型 / 複雜任務", "time_limit_s": 180.0, "ttft_limit_s": 15.0, "hallucination_threshold": 0.95, "num_predict": 256}
+    chat_constraints = {"name": "小型模型 / 聊天場景", "time_limit_s": 30.0, "ttft_limit_s": 2.0, "hallucination_threshold": 0.95, "num_predict": 1024}
+    summary_constraints = {"name": "中型模型 / 摘要場景", "time_limit_s": 120.0, "ttft_limit_s": 6.0, "num_predict": 2048, "hallucination_threshold": 1.0}
+    large_model_constraints = {"name": "大型模型 / 複雜任務", "time_limit_s": 180.0, "ttft_limit_s": 15.0, "hallucination_threshold": 0.95, "num_predict": 8192}
     if 0 < size_b < 10: return chat_constraints
     elif 10 <= size_b <= 18: return summary_constraints
     elif size_b > 18: return large_model_constraints
@@ -226,6 +226,8 @@ class OllamaAutoTuner:
             print("\n--- 最終最佳化設定 ---")
             final_settings = self.best_settings.copy()
             final_settings['num_predict'] = self.constraints['num_predict']
+            if 'num_gpu' in final_settings and final_settings['num_gpu'] == 101:
+                final_settings['num_gpu'] = 100            
             print(pd.Series(final_settings).to_string())
             return {"model_name": self.model_name, "optimal_settings": final_settings,
                     "constraints": self.constraints, "final_performance": final_performance}

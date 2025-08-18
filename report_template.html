@@ -83,9 +83,27 @@
             display: inline-block;
             margin-left: 10px;
         }
-        .badge.excellent { background-color: #2ecc71; } /* 優秀 */
-        .badge.good { background-color: #f39c12; }    /* 良好 */
-        .badge.poor { background-color: #e74c3c; }     /* 待改進 */
+        .badge.excellent { background-color: #2ecc71; }
+        .badge.good { background-color: #f39c12; }
+        .badge.poor { background-color: #e74c3c; }
+        .explanation-section {
+            margin-top: 40px;
+        }
+        .explanation-item {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .explanation-item h4 {
+            margin-top: 0;
+            color: #34495e;
+            font-size: 1.2em;
+        }
+        .explanation-item p {
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -200,6 +218,39 @@
         <hr style="margin-top: 40px; border: 1px solid #eee;">
         {% endfor %}
 
+        <div class="explanation-section">
+            <h2>📘 參數說明</h2>
+            <div class="explanation-item">
+                <h4>temperature</h4>
+                <p>控制模型產生文字的隨機性。這是最常用於調整模型「創意度」的參數。</p>
+                <p><strong>較高值 (如 1.0):</strong> 回應更具多樣性、創意和豐富性。適合用於腦力激盪、寫作等任務。缺點是可能偏離主題或產生不準確的內容。</p>
+                <p><strong>較低值 (如 0.3):</strong> 回應更具確定性、集中和可預測。適合用於事實問答、程式碼生成、內容摘要等需要高準確性的任務。缺點是可能顯得重複或呆板。</p>
+            </div>
+            <div class="explanation-item">
+                <h4>top_p (Nucleus Sampling)</h4>
+                <p>另一種控制隨機性的方法，它從一個累積機率超過 `p` 值的最小詞彙集中進行抽樣。通常建議只調整 `temperature` 或 `top_p` 其中一個。</p>
+                <p><strong>較高值 (如 1.0):</strong> 考慮的詞彙範圍更廣，效果類似於高 `temperature`。</p>
+                <p><strong>較低值 (如 0.9):</strong> 限制模型只考慮可能性較高的詞彙，可以有效防止生成奇怪或不相關的詞語，在保持一定創意的同時提高連貫性。</p>
+            </div>
+            <div class="explanation-item">
+                <h4>hallucination_score (幻覺分數)</h4>
+                <p>這是**本工具產生的評估指標**，而非 LLM 的內建參數。它衡量模型在回答問題時，是否嚴格遵循所提供的上下文。</p>
+                <p><strong>較高值 (如 0.9+):</strong> 表現優秀。模型非常「誠實」，在資訊不足時會承認，而不是捏造答案。</p>
+                <p><strong>較低值 (如 < 0.6):</strong> 表現不佳。模型經常產生幻覺，即編造出上下文中不存在的資訊。</p>
+            </div>
+            <div class="explanation-item">
+                <h4>num_ctx (上下文長度)</h4>
+                <p>模型能夠「記住」的文本長度（單位：token）。它決定了模型能處理多長的對話歷史或文件內容。</p>
+                <p><strong>較高值 (如 8192):</strong> 能處理長篇文件或進行長時間的連續對話。缺點是會消耗大量 VRAM/RAM，且處理速度可能變慢。</p>
+                <p><strong>較低值 (如 2048):</strong> 資源消耗較少，運行速度較快。缺點是處理長文本時，模型可能會「忘記」開頭的內容。</p>
+            </div>
+            <div class="explanation-item">
+                <h4>num_gpu (GPU 層數)</h4>
+                <p>分配到 GPU 進行運算的模型層數。這是影響本地 LLM 運行速度的**最關鍵因素**。</p>
+                <p><strong>較高值:</strong> 絕大多數運算由高速的 GPU 完成，能極大地提升 TTFT 和 TPS。缺點是需要消耗大量 VRAM。如果設定值超過 GPU 實際能承載的層數，性能反而會急劇下降或出錯。</p>
+                <p><strong>較低值 (包括 0):</strong> 更多或全部運算由 CPU 完成，VRAM 消耗少。優點是能在 VRAM 不足的硬體上運行大型模型，缺點是速度會非常慢。</p>
+            </div>
+        </div>
         <div class="footer">
             報告由 Ollama Auto-Tuner 自動生成
         </div>
