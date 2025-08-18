@@ -83,9 +83,10 @@ You can easily customize this tool to meet your specific needs:
 
 *   **Beautify the Report**: Directly edit the `report_template.html` file. You can freely change the style, layout, or add charts (e.g., using [Chart.js](https://www.chartjs.org/)).
 
-## 🙏 Acknowledgements
+## 🙏 License & Acknowledgements
 
-This project was born from an idea and gradually refined through numerous iterations and debugging sessions with an AI assistant. Thanks to all open-source community contributors, especially the Ollama team.
+This project is open-source and uses various third-party libraries.
+Please review their licenses carefully before using this code for commercial purposes.
 
 ---
 
@@ -172,9 +173,7 @@ python ollama_autotuner.py
 
 *   **美化報告**：直接編輯 `report_template.html` 檔案，您可以自由地修改報告的樣式、佈局或新增圖表（例如使用 [Chart.js](https://www.chartjs.org/)）。
 
-## ⚖️ 授權與感謝 / License & Acknowledgements
+## ⚖️ 授權與感謝
 
 此專案為開源項目，使用了多個第三方函式庫。
-This project is open-source and uses various third-party libraries.
 請仔細閱讀其授權條款，在商業用途前務必審視清楚。
-Please review their licenses carefully before using this code for commercial purposes.
