@@ -1,0 +1,3 @@
+ollama
+pandas
+Jinja2
