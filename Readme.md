@@ -28,7 +28,8 @@ This tool automatically answers these questions for you and generates a clear, p
 
 ## 📊 Sample Report
 
-*(Hint: You can take a screenshot of your report and replace this link)*
+<img width="1205" height="1063" alt="image" src="https://github.com/user-attachments/assets/955c230c-e03c-4877-92db-d60954027eb7" />
+
 
 ## 🛠️ Installation Guide
 
@@ -118,7 +119,8 @@ Ollama Auto-Tuner 是一個使用 Python 開發的強大工具，旨在自動化
 
 ## 📊 報告範例
 
-*(提示: 您可以將您的報告截圖並替換此處的連結)*
+<img width="1205" height="1063" alt="image" src="https://github.com/user-attachments/assets/1bcf0c80-2a95-4f4e-88d5-9d40f4dcc212" />
+
 
 ## 🛠️ 安裝指南
 
@@ -177,3 +179,4 @@ python ollama_autotuner.py
 
 此專案為開源項目，使用了多個第三方函式庫。
 請仔細閱讀其授權條款，在商業用途前務必審視清楚。
+
