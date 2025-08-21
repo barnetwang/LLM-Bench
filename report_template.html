@@ -5,29 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ollama Auto-Tuner 性能報告</title>
     <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --card-bg-color: #ffffff;
+            --border-color: #dee2e6;
+            --primary-color: #007bff;
+            --primary-text-color: #ffffff;
+            --table-header-bg: #f2f2f2;
+            --table-row-hover: #e9ecef;
+            --badge-excellent-bg: #28a745;
+            --badge-good-bg: #ffc107;
+            --badge-poor-bg: #dc3545;
+            --shadow-color: rgba(0, 0, 0, 0.05);
+            --icon-filter: none;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg-color: #1e1e1e;
+            --border-color: #3a3a3a;
+            --primary-color: #3498db;
+            --table-header-bg: #2c2c2c;
+            --table-row-hover: #343434;
+            --badge-excellent-bg: #27ae60;
+            --badge-good-bg: #f39c12;
+            --badge-poor-bg: #e74c3c;
+            --shadow-color: rgba(0, 0, 0, 0.2);
+            --icon-filter: invert(1) hue-rotate(180deg);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f4f7f6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
             margin: 0;
             padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
         }
         .container {
-            max-width: 900px;
+            max-width: 960px;
             margin: auto;
-            background: #fff;
+            background: var(--card-bg-color);
             padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 6px 12px var(--shadow-color);
+            border: 1px solid var(--border-color);
         }
         h1, h2, h3 {
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
             padding-bottom: 10px;
         }
-        h1 { font-size: 2.2em; text-align: center; }
-        h2 { font-size: 1.8em; margin-top: 40px; }
+        h1 { font-size: 2.4em; text-align: center; border-bottom: none; letter-spacing: 0.5px; }
+        h2 { font-size: 2em; margin-top: 50px; letter-spacing: 0.3px;}
         table {
             width: 100%;
             border-collapse: collapse;
@@ -36,14 +69,13 @@
         th, td {
             padding: 12px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid var(--border-color);
         }
         th {
-            background-color: #3498db;
-            color: white;
+            background-color: var(--table-header-bg);
+            font-weight: 600;
         }
-        tr:nth-child(even) { background-color: #f2f2f2; }
-        tr:hover { background-color: #e8f4fd; }
+        tr:hover { background-color: var(--table-row-hover); }
         .footer {
             text-align: center;
             margin-top: 40px;
@@ -52,62 +84,143 @@
         }
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px;
             margin-top: 20px;
         }
         .summary-card {
-            background-color: #ecf0f1;
+            background-color: var(--card-bg-color);
             padding: 20px;
-            border-radius: 5px;
-            border-left: 5px solid #3498db;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px var(--shadow-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px var(--shadow-color);
         }
         .summary-card h3 {
             margin-top: 0;
             border-bottom: none;
             padding-bottom: 0;
-            color: #3498db;
+            color: var(--primary-color);
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .summary-card h3 svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+        .conclusion-recommended {
+            color: var(--badge-excellent-bg);
+            font-weight: bold;
+        }
+        .conclusion-poor {
+            color: var(--badge-poor-bg);
+            font-weight: bold;
+        }
+        .conclusion-balanced {
+            font-weight: bold;
         }
         .summary-card p {
-            font-size: 1.8em;
+            font-size: 2em;
             margin: 10px 0 0 0;
-            font-weight: bold;
-            color: #2c3e50;
+            font-weight: 700;
+            color: var(--text-color);
         }
         .badge {
             color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.8em;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
             font-weight: bold;
             display: inline-block;
             margin-left: 10px;
         }
-        .badge.excellent { background-color: #2ecc71; }
-        .badge.good { background-color: #f39c12; }
-        .badge.poor { background-color: #e74c3c; }
+        .badge.excellent { background-color: var(--badge-excellent-bg); }
+        .badge.good { background-color: var(--badge-good-bg); }
+        .badge.poor { background-color: var(--badge-poor-bg); }
         .explanation-section {
             margin-top: 40px;
         }
+        .explanation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
         .explanation-item {
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 5px;
-            padding: 15px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
             margin-bottom: 15px;
         }
         .explanation-item h4 {
             margin-top: 0;
-            color: #34495e;
-            font-size: 1.2em;
+            color: var(--primary-color);
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .explanation-item p {
-            margin-bottom: 5px;
+        .explanation-item h4 svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
         }
+        .explanation-item p { margin-bottom: 8px; line-height: 1.8; }
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        .theme-switch {
+            display: inline-block;
+            height: 34px;
+            position: relative;
+            width: 60px;
+        }
+        .theme-switch input { display: none; }
+        .slider {
+            background-color: #ccc;
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+        }
+        .slider:before {
+            background-color: #fff;
+_response_to_get_from_agent
+            bottom: 4px;
+            content: "";
+            height: 26px;
+            left: 4px;
+            position: absolute;
+            transition: .4s;
+            width: 26px;
+        }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(26px); }
+        .slider.round { border-radius: 34px; }
+        .slider.round:before { border-radius: 50%; }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="theme-switch-wrapper">
+            <label class="theme-switch" for="checkbox">
+                <input type="checkbox" id="checkbox" />
+                <div class="slider round"></div>
+            </label>
+        </div>
         <h1>🚀 Ollama Auto-Tuner 性能報告</h1>
         <p class="footer">報告生成時間：{{ timestamp }}</p>
 
@@ -139,11 +252,11 @@
                     <td>{{ "%.2f" % (result.final_performance.ttft * 1000) }}</td>
                     <td>{{ "%.2f" % result.final_performance.tps }}</td>
                     {% if result.optimal_settings.hallucination_score >= 0.75 and result.final_performance.tps >= 50 %}
-                        <td style="color: #27ae60; font-weight: bold;">⭐ 推薦使用</td>
+                        <td class="conclusion-recommended">⭐ 推薦使用</td>
                     {% elif result.optimal_settings.hallucination_score < 0.6 %}
-                        <td style="color: #c0392b;">品質不佳</td>
+                        <td class="conclusion-poor">💔 品質不佳</td>
                     {% else %}
-                        <td>性能均衡</td>
+                        <td class="conclusion-balanced">⚡️ 性能均衡</td>
                     {% endif %}
                 </tr>
                 {% endfor %}
@@ -151,19 +264,19 @@
         </table>
         {% for result in results %}
         <div class="model-section">
-            <h2>模型: {{ result.model_name }}</h2>
+            <h2>⚙️ 模型: {{ result.model_name }}</h2>
 
             <div class="summary-grid">
                 <div class="summary-card">
-                    <h3>首字元時間 (TTFT)</h3>
+                    <h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M9.375 3a1.875 1.875 0 0 0-1.875 1.875v14.25c0 1.036.84 1.875 1.875 1.875h5.25a1.875 1.875 0 0 0 1.875-1.875V4.875A1.875 1.875 0 0 0 14.625 3h-5.25ZM10.5 6a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75h-.008a.75.75 0 0 1-.75-.75V6.75a.75.75 0 0 1 .75-.75Zm.75 2.25a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75v-.008a.75.75 0 0 0-.75-.75h-.008ZM10.5 12a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75h-.008a.75.75 0 0 1-.75-.75v-.008A.75.75 0 0 1 10.5 12Zm2.25-4.5a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V8.25a.75.75 0 0 0-.75-.75h-.008ZM12.75 12a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75h-.008a.75.75 0 0 1-.75-.75v-.008a.75.75 0 0 1 .75-.75Z M12 15.75a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75v-.008a.75.75 0 0 0-.75-.75h-.008Z"></path></svg>首字元時間 (TTFT)</h3>
                     <p>{{ "%.2f ms" % (result.final_performance.ttft * 1000) }}</p>
                 </div>
                 <div class="summary-card">
-                    <h3>生成速度 (TPS)</h3>
+                    <h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 8.25a.75.75 0 0 1 .75.75v3.75h3.75a.75.75 0 0 1 0 1.5h-3.75V18a.75.75 0 0 1-1.5 0v-3.75H7.5a.75.75 0 0 1 0-1.5h3.75V9a.75.75 0 0 1 .75-.75Z M12 1.5a10.5 10.5 0 1 0 0 21 10.5 10.5 0 0 0 0-21Z"></path></svg>生成速度 (TPS)</h3>
                     <p>{{ "%.2f" % result.final_performance.tps }} tokens/s</p>
                 </div>
                 <div class="summary-card">
-                    <h3>總耗時</h3>
+                    <h3><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd"></path></svg>總耗時</h3>
                     <p>{{ "%.2f s" % result.final_performance.duration }}</p>
                 </div>
             </div>
@@ -215,45 +328,76 @@
                 </tbody>
             </table>
         </div>
-        <hr style="margin-top: 40px; border: 1px solid #eee;">
+        <hr style="margin-top: 40px; border: 1px solid var(--border-color);">
         {% endfor %}
 
         <div class="explanation-section">
             <h2>📘 參數說明</h2>
-            <div class="explanation-item">
-                <h4>temperature</h4>
-                <p>控制模型產生文字的隨機性。這是最常用於調整模型「創意度」的參數。</p>
-                <p><strong>較高值 (如 1.0):</strong> 回應更具多樣性、創意和豐富性。適合用於腦力激盪、寫作等任務。缺點是可能偏離主題或產生不準確的內容。</p>
-                <p><strong>較低值 (如 0.3):</strong> 回應更具確定性、集中和可預測。適合用於事實問答、程式碼生成、內容摘要等需要高準確性的任務。缺點是可能顯得重複或呆板。</p>
-            </div>
-            <div class="explanation-item">
-                <h4>top_p (Nucleus Sampling)</h4>
-                <p>另一種控制隨機性的方法，它從一個累積機率超過 `p` 值的最小詞彙集中進行抽樣。通常建議只調整 `temperature` 或 `top_p` 其中一個。</p>
-                <p><strong>較高值 (如 1.0):</strong> 考慮的詞彙範圍更廣，效果類似於高 `temperature`。</p>
-                <p><strong>較低值 (如 0.9):</strong> 限制模型只考慮可能性較高的詞彙，可以有效防止生成奇怪或不相關的詞語，在保持一定創意的同時提高連貫性。</p>
-            </div>
-            <div class="explanation-item">
-                <h4>hallucination_score (幻覺分數)</h4>
-                <p>這是**本工具產生的評估指標**，而非 LLM 的內建參數。它衡量模型在回答問題時，是否嚴格遵循所提供的上下文。</p>
-                <p><strong>較高值 (如 0.9+):</strong> 表現優秀。模型非常「誠實」，在資訊不足時會承認，而不是捏造答案。</p>
-                <p><strong>較低值 (如 < 0.6):</strong> 表現不佳。模型經常產生幻覺，即編造出上下文中不存在的資訊。</p>
-            </div>
-            <div class="explanation-item">
-                <h4>num_ctx (上下文長度)</h4>
-                <p>模型能夠「記住」的文本長度（單位：token）。它決定了模型能處理多長的對話歷史或文件內容。</p>
-                <p><strong>較高值 (如 8192):</strong> 能處理長篇文件或進行長時間的連續對話。缺點是會消耗大量 VRAM/RAM，且處理速度可能變慢。</p>
-                <p><strong>較低值 (如 2048):</strong> 資源消耗較少，運行速度較快。缺點是處理長文本時，模型可能會「忘記」開頭的內容。</p>
-            </div>
-            <div class="explanation-item">
-                <h4>num_gpu (GPU 層數)</h4>
-                <p>分配到 GPU 進行運算的模型層數。這是影響本地 LLM 運行速度的**最關鍵因素**。</p>
-                <p><strong>較高值:</strong> 絕大多數運算由高速的 GPU 完成，能極大地提升 TTFT 和 TPS。缺點是需要消耗大量 VRAM。如果設定值超過 GPU 實際能承載的層數，性能反而會急劇下降或出錯。</p>
-                <p><strong>較低值 (包括 0):</strong> 更多或全部運算由 CPU 完成，VRAM 消耗少。優點是能在 VRAM 不足的硬體上運行大型模型，缺點是速度會非常慢。</p>
+            <div class="explanation-grid">
+                <div class="explanation-item">
+                    <h4><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12.75 2.25a.75.75 0 0 0-1.5 0v16.504l-3.32-3.32a.75.75 0 0 0-1.06 1.06l4.5 4.5a.75.75 0 0 0 1.06 0l4.5-4.5a.75.75 0 0 0-1.06-1.06l-3.32 3.32V2.25Z" /></svg>temperature</h4>
+                    <p>控制模型產生文字的隨機性。這是最常用於調整模型「創意度」的參數。</p>
+                    <p><strong>較高值 (如 1.0):</strong> 回應更具多樣性、創意和豐富性。適合用於腦力激盪、寫作等任務。缺點是可能偏離主題或產生不準確的內容。</p>
+                    <p><strong>較低值 (如 0.3):</strong> 回應更具確定性、集中和可預測。適合用於事實問答、程式碼生成、內容摘要等需要高準確性的任務。缺點是可能顯得重複或呆板。</p>
+                </div>
+                <div class="explanation-item">
+                    <h4><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M11.25 4.533A9.708 9.708 0 0 0 1.5 12a9.708 9.708 0 0 0 9.75 7.467 9.708 9.708 0 0 0 9.75-7.467c0-2.348-.84-4.51-2.26-6.212A.75.75 0 0 0 17.44 6.64a8.208 8.208 0 0 1 1.81 4.61A8.208 8.208 0 0 1 11.25 18a8.208 8.208 0 0 1-8-5.75a.75.75 0 0 0-1.4.4c.313 1.9 1.968 3.35 3.9 3.35a4.125 4.125 0 0 0 4.125-4.125A.75.75 0 0 0 9 12a.75.75 0 0 0-.75.75 2.625 2.625 0 1 1-2.625-2.625.75.75 0 0 0 0-1.5 4.125 4.125 0 0 0-3.375 6.875.75.75 0 0 0 1.4-.4 2.625 2.625 0 0 1 2.5-2.25.75.75 0 0 0 .75-.75Z" /></svg>top_p (Nucleus Sampling)</h4>
+                    <p>另一種控制隨機性的方法，它從一個累積機率超過 `p` 值的最小詞彙集中進行抽樣。通常建議只調整 `temperature` 或 `top_p` 其中一個。</p>
+                    <p><strong>較高值 (如 1.0):</strong> 考慮的詞彙範圍更廣，效果類似於高 `temperature`。</p>
+                    <p><strong>較低值 (如 0.9):</strong> 限制模型只考慮可能性較高的詞彙，可以有效防止生成奇怪或不相關的詞語，在保持一定創意的同時提高連貫性。</p>
+                </div>
+                <div class="explanation-item">
+                    <h4><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path fill-rule="evenodd" d="M8.25 5.252a3.375 3.375 0 0 1 3.375-3.375h.876c.424 0 .848.168 1.164.484l3.84 3.84a1.125 1.125 0 0 1 .328.794v8.25a3.375 3.375 0 0 1-3.375 3.375h-4.5a3.375 3.375 0 0 1-3.375-3.375V8.625a3.375 3.375 0 0 1 3.375-3.375Zm1.875.75a.75.75 0 0 0 0 1.5h.375a.75.75 0 0 0 0-1.5h-.375Z" clip-rule="evenodd" /></svg>hallucination_score (幻覺分數)</h4>
+                    <p>這是**本工具產生的評估指標**，而非 LLM 的內建參數。它衡量模型在回答問題時，是否嚴格遵循所提供的上下文。</p>
+                    <p><strong>較高值 (如 0.9+):</strong> 表現優秀。模型非常「誠實」，在資訊不足時會承認，而不是捏造答案。</p>
+                    <p><strong>較低值 (如 < 0.6):</strong> 表現不佳。模型經常產生幻覺，即編造出上下文中不存在的資訊。</p>
+                </div>
+                <div class="explanation-item">
+                    <h4><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path fill-rule="evenodd" d="M5.625 1.5a.75.75 0 0 1 .75.75v1.875c0 .53-.42.938-.938.938h-1.874c-.52 0-.938-.408-.938-.938V2.25a.75.75 0 0 1 .75-.75h2.25Z" clip-rule="evenodd" /><path d="M3 3.75A2.25 2.25 0 0 0 .75 6v12A2.25 2.25 0 0 0 3 20.25h12.75a.75.75 0 0 0 0-1.5H3a.75.75 0 0 1-.75-.75V6c0-.414.336-.75.75-.75h12.75a.75.75 0 0 0 0-1.5H3Z" /><path d="M12.75 5.25a.75.75 0 0 0 0 1.5h5.25a.75.75 0 0 0 0-1.5h-5.25Z" /><path d="M12.75 9a.75.75 0 0 0 0 1.5h5.25a.75.75 0 0 0 0-1.5h-5.25Z" /><path d="M12.75 12.75a.75.75 0 0 0 0 1.5h5.25a.75.75 0 0 0 0-1.5h-5.25Z" /></svg>num_ctx (上下文長度)</h4>
+                    <p>模型能夠「記住」的文本長度（單位：token）。它決定了模型能處理多長的對話歷史或文件內容。</p>
+                    <p><strong>較高值 (如 8192):</strong> 能處理長篇文件或進行長時間的連續對話。缺點是會消耗大量 VRAM/RAM，且處理速度可能變慢。</p>
+                    <p><strong>較低值 (如 2048):</strong> 資源消耗較少，運行速度較快。缺點是處理長文本時，模型可能會「忘記」開頭的內容。</p>
+                </div>
+                <div class="explanation-item">
+                    <h4><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5A2.25 2.25 0 0 0 8.25 22.5h7.5A2.25 2.25 0 0 0 18 20.25V3.75A2.25 2.25 0 0 0 15.75 1.5h-2.25a.75.75 0 0 0 0 1.5h2.25V5h-7.5V3h2.25a.75.75 0 0 0 0-1.5ZM9 6.75h6v1.5H9v-1.5Zm6 3.75H9v1.5h6v-1.5Zm-6 3.75h6v1.5H9v-1.5Z" /></svg>num_gpu (GPU 層數)</h4>
+                    <p>分配到 GPU 進行運算的模型層數。這是影響本地 LLM 運行速度的**最關鍵因素**。</p>
+                    <p><strong>較高值:</strong> 絕大多數運算由高速的 GPU 完成，能極大地提升 TTFT 和 TPS。缺點是需要消耗大量 VRAM。如果設定值超過 GPU 實際能承載的層數，性能反而會急劇下降或出錯。</p>
+                    <p><strong>較低值 (包括 0):</strong> 更多或全部運算由 CPU 完成，VRAM 消耗少。優點是能在 VRAM 不足的硬體上運行大型模型，缺點是速度會非常慢。</p>
+                </div>
             </div>
         </div>
         <div class="footer">
             報告由 Ollama Auto-Tuner 自動生成
         </div>
     </div>
+    <script>
+        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+        const currentTheme = localStorage.getItem('theme');
+        const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        // Set initial theme based on localStorage or system preference
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'dark') {
+                toggleSwitch.checked = true;
+            }
+        } else if (isDarkMode) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+            toggleSwitch.checked = true;
+        }
+
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        toggleSwitch.addEventListener('change', switchTheme, false);
+    </script>
 </body>
 </html>
