@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ollama Auto-Tuner 監控面板</title>
+    <style>
+        :root {
+            --bg-color: #1a1b26;
+            --card-bg: #24283b;
+            --text-color: #c0caf5;
+            --header-color: #bb9af7;
+            --border-color: #414868;
+            --success-color: #9ece6a;
+            --warning-color: #e0af68;
+            --error-color: #f7768e;
+            --info-color: #7aa2f7;
+            --button-bg: #7aa2f7;
+            --button-hover-bg: #9dacfa;
+            --button-disabled-bg: #565f89;
+        }
+        body {
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            font-size: 16px;
+        }
+        .container { max-width: 1400px; margin: auto; }
+        h1 { color: var(--header-color); text-align: center; }
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+        .card h2 { margin-top: 0; color: var(--info-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        #status-box { text-align: center; }
+        #status-message { font-size: 1.2em; font-weight: bold; padding: 15px; border-radius: 8px; transition: all 0.3s; }
+        .status-idle { background-color: var(--border-color); color: var(--text-color); }
+        .status-running { background-color: var(--warning-color); color: var(--bg-color); }
+        .status-completed { background-color: var(--success-color); color: var(--bg-color); }
+        .status-error { background-color: var(--error-color); color: var(--bg-color); }
+        .status-stopped { background-color: #ff9e64; color: var(--bg-color); }
+        .controls button, .controls select { 
+            padding: 10px 15px; font-size: 1em; border: none; border-radius: 5px; cursor: pointer; 
+            background-color: var(--button-bg); color: var(--bg-color); margin: 5px; 
+        }
+        .controls button:hover { background-color: var(--button-hover-bg); }
+        .controls button:disabled { background-color: var(--button-disabled-bg); cursor: not-allowed; }
+        #log-container { height: 300px; overflow-y: auto; background-color: #16161e; padding: 10px; border-radius: 5px; }
+        .log-entry { margin-bottom: 5px; border-left: 3px solid; padding-left: 8px; }
+        .log-info { border-color: var(--info-color); }
+        .log-warning { border-color: var(--warning-color); }
+        .log-error { border-color: var(--error-color); }
+        #results-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        #results-table th, #results-table td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        #results-table th { color: var(--info-color); }
+        .progress-bar { width: 100%; background-color: var(--border-color); border-radius: 5px; overflow: hidden; }
+        .progress-bar-inner { height: 20px; background-color: var(--success-color); width: 0%; text-align: center; line-height: 20px; color: var(--bg-color); transition: width 0.4s; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Ollama Auto-Tuner 監控面板</h1>
+
+        <div class="card" id="status-box">
+            <h2>狀態</h2>
+            <div id="status-message" class="status-idle">等待連接...</div>
+            <div class="controls">
+                <select id="model-select"><option value="">所有模型</option></select>
+                <button id="start-btn">開始調校</button>
+                <button id="stop-btn" disabled>停止調校</button>
+                <button id="report-btn" disabled>產生完整報告</button>
+            </div>
+        </div>
+
+        <div class="grid-container">
+            <div class="card">
+                <h2>系統資訊</h2>
+                <div id="system-info">
+                    <p><strong>系統記憶體:</strong> <span id="sys-mem">N/A</span></p>
+                    <div class="progress-bar"><div id="sys-mem-bar" class="progress-bar-inner"></div></div>
+                    <p style="margin-top: 15px;"><strong>GPU 記憶體:</strong></p>
+                    <div id="gpu-info">N/A</div>
+                    <p style="margin-top: 15px;"><strong>緩存:</strong> <span id="cache-info">N/A</span></p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>日誌</h2>
+                <div id="log-container"></div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <h2>調校結果 (即時)</h2>
+            <table id="results-table">
+                <thead>
+                    <tr>
+                        <th>模型</th>
+                        <th>最佳設定</th>
+                        <th>性能 (TPS)</th>
+                        <th>品質評分</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const socket = io();
+
+            const statusMessage = document.getElementById('status-message');
+            const startBtn = document.getElementById('start-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            const reportBtn = document.getElementById('report-btn');
+            const modelSelect = document.getElementById('model-select');
+            const logContainer = document.getElementById('log-container');
+            const resultsTableBody = document.querySelector('#results-table tbody');
+            
+            const sysMemSpan = document.getElementById('sys-mem');
+            const sysMemBar = document.getElementById('sys-mem-bar');
+            const gpuInfoDiv = document.getElementById('gpu-info');
+            const cacheInfoSpan = document.getElementById('cache-info');
+
+            socket.on('connect', () => {
+                statusMessage.textContent = '已連接到後端服務';
+                statusMessage.className = 'status-idle';
+            });
+
+            socket.on('disconnect', () => {
+                statusMessage.textContent = '與後端服務斷開連接';
+                statusMessage.className = 'status-error';
+                startBtn.disabled = true;
+                stopBtn.disabled = true;
+                reportBtn.disabled = true;
+            });
+
+            socket.on('status_update', (data) => {
+                statusMessage.textContent = data.message;
+                statusMessage.className = `status-${data.state}`;
+                if (data.state === 'running') {
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                    reportBtn.disabled = true;
+                } else {
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    reportBtn.disabled = (data.state !== 'completed');
+                }
+            });
+
+            socket.on('log_update', (logs) => {
+                logs.forEach(log => {
+                    const logEntry = document.createElement('div');
+                    logEntry.className = `log-entry log-${log.level}`;
+                    logEntry.textContent = log.message;
+                    logContainer.appendChild(logEntry);
+                });
+                logContainer.scrollTop = logContainer.scrollHeight;
+            });
+
+            socket.on('memory_update', (data) => {
+                if (!data) return;
+                if (data.system_memory) {
+                    const sys = data.system_memory;
+                    const sysText = `${(sys.current_percent || 0).toFixed(1)}% (Avg: ${(sys.average_percent || 0).toFixed(1)}%, Max: ${(sys.max_percent || 0).toFixed(1)}%)`;
+                    sysMemSpan.textContent = sysText;
+                    sysMemBar.style.width = `${(sys.current_percent || 0)}%`;
+                    sysMemBar.textContent = `${(sys.current_percent || 0).toFixed(1)}%`;
+                }
+                
+                if (data.gpu_memory && typeof data.gpu_memory === 'object' && Object.keys(data.gpu_memory).length > 0) {
+                    let gpuHtml = '';
+                    for (const [id, gpu] of Object.entries(data.gpu_memory)) {
+                        if (gpu && typeof gpu === 'object') {
+                           gpuHtml += `<p style="margin: 5px 0;"><strong>GPU ${id} (${gpu.name || 'N/A'}):</strong> ${(gpu.current_percent || 0).toFixed(1)}%</p>`;
+                           gpuHtml += `<div class="progress-bar"><div class="progress-bar-inner" style="width: ${(gpu.current_percent || 0)}%;">${(gpu.current_percent || 0).toFixed(1)}%</div></div>`;
+                        }
+                    }
+                    gpuInfoDiv.innerHTML = gpuHtml;
+                } else {
+                    gpuInfoDiv.textContent = '未檢測到 GPU 或無數據';
+                }
+            });
+
+            socket.on('cache_update', (data) => {
+                if (data && data.total_files !== undefined) {
+                    cacheInfoSpan.textContent = `${data.total_files} 個檔案, ${(data.total_size_mb || 0).toFixed(2)} MB`;
+                }
+            });
+
+            socket.on('new_result', (result) => {
+                if (!result) return;
+                const row = resultsTableBody.insertRow();
+                row.insertCell(0).textContent = result.model_name || 'N/A';
+                
+                let settingsHtml = '';
+                if(result.optimal_settings && typeof result.optimal_settings === 'object'){
+                    for(const [key, value] of Object.entries(result.optimal_settings)){
+                        if (typeof value === 'number') {
+                            settingsHtml += `<div><strong>${key}:</strong> ${value.toFixed(3)}</div>`;
+                        } else if (typeof value !== 'object') {
+                            settingsHtml += `<div><strong>${key}:</strong> ${value}</div>`;
+                        }
+                    }
+                }
+                row.insertCell(1).innerHTML = settingsHtml;
+
+                const perf = result.final_performance || {};
+                row.insertCell(2).textContent = (perf.tps || 0).toFixed(2);
+
+                const quality = result.optimal_settings?.detailed_evaluation?.overall || 0;
+                row.insertCell(3).textContent = quality.toFixed(3);
+            });
+
+            socket.on('available_models', (data) => {
+                modelSelect.innerHTML = '<option value="">所有模型</option>';
+                if (data && data.models) {
+                    data.models.forEach(m => {
+                        const option = document.createElement('option');
+                        option.value = m;
+                        option.textContent = m;
+                        modelSelect.appendChild(option);
+                    });
+                }
+            });
+
+            socket.on('report_generated', (data) => {
+                if (data && data.filename) {
+                    window.open(data.filename, '_blank');
+                }
+            });
+
+            startBtn.addEventListener('click', () => {
+                resultsTableBody.innerHTML = '';
+                const selectedModel = modelSelect.value;
+                socket.emit('start_tuning', { model_name: selectedModel });
+            });
+
+            stopBtn.addEventListener('click', () => {
+                socket.emit('stop_tuning');
+            });
+
+            reportBtn.addEventListener('click', () => {
+                socket.emit('generate_report');
+            });
+        });
+    </script>
+</body>
+</html>
