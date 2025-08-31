@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>增強的 Ollama Auto-Tuner 報告</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --card-bg-color: #ffffff;
+            --border-color: #dee2e6;
+            --primary-color: #007bff;
+            --primary-text-color: #ffffff;
+            --table-header-bg: #f2f2f2;
+            --table-row-hover: #e9ecef;
+            --badge-excellent-bg: #28a745;
+            --badge-good-bg: #ffc107;
+            --badge-poor-bg: #dc3545;
+            --shadow-color: rgba(0, 0, 0, 0.05);
+            --icon-filter: none;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg-color: #1e1e1e;
+            --border-color: #3a3a3a;
+            --primary-color: #3498db;
+            --table-header-bg: #2c2c2c;
+            --table-row-hover: #343434;
+            --badge-excellent-bg: #27ae60;
+            --badge-good-bg: #f39c12;
+            --badge-poor-bg: #e74c3c;
+            --shadow-color: rgba(0, 0, 0, 0.2);
+            --icon-filter: invert(1) hue-rotate(180deg);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: var(--card-bg-color);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px var(--shadow-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .theme-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .theme-switch input[type="checkbox"] {
+            display: none;
+        }
+
+        .theme-switch label {
+            cursor: pointer;
+            padding: 10px;
+            background: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .summary-card {
+            background-color: var(--card-bg-color);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px var(--shadow-color);
+            transition: transform 0.2s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .summary-card h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .chart-container {
+            background: var(--card-bg-color);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .chart-container h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--card-bg-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px var(--shadow-color);
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .results-table th {
+            background-color: var(--table-header-bg);
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .results-table tr:hover {
+            background-color: var(--table-row-hover);
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-excellent {
+            background-color: var(--badge-excellent-bg);
+            color: white;
+        }
+
+        .badge-good {
+            background-color: var(--badge-good-bg);
+            color: black;
+        }
+
+        .badge-poor {
+            background-color: var(--badge-poor-bg);
+            color: white;
+        }
+
+        .model-details {
+            background: var(--card-bg-color);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .model-details h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        .parameter-importance {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .parameter-item {
+            background: var(--table-header-bg);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .optimization-history {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+        }
+
+        .history-item {
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-item.best {
+            background-color: var(--badge-excellent-bg);
+            color: white;
+            border-radius: 4px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            color: #666;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card-bg-color);
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-switch">
+        <input type="checkbox" id="theme-toggle">
+        <label for="theme-toggle">
+            <span>🌙</span>
+            <span>淺色/深色</span>
+        </label>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🚀 增強的 Ollama Auto-Tuner 報告</h1>
+            <div class="subtitle">生成時間: {{ timestamp }}</div>
+        </div>
+
+        <!-- 系統統計 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ results|length }}</div>
+                <div class="stat-label">測試模型數量</div>
+            </div>
+            {% if memory_summary.system_memory %}
+            <div class="stat-card">
+                <div class="stat-value">{{ "%.1f"|format(memory_summary.system_memory.current_percent) }}%</div>
+                <div class="stat-label">系統記憶體使用率</div>
+            </div>
+            {% endif %}
+            {% if cache_stats.total_files %}
+            <div class="stat-card">
+                <div class="stat-value">{{ cache_stats.total_files }}</div>
+                <div class="stat-label">緩存檔案數量</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ "%.2f"|format(cache_stats.total_size_mb) }} MB</div>
+                <div class="stat-label">緩存總大小</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 性能對比圖表 -->
+        <div class="chart-container">
+            <h3>📊 模型性能對比</h3>
+            <canvas id="performanceChart" width="400" height="200"></canvas>
+        </div>
+
+        <!-- 參數重要性圖表 -->
+        <div class="chart-container">
+            <h3>🎯 參數重要性分析</h3>
+            <canvas id="importanceChart" width="400" height="200"></canvas>
+        </div>
+
+        <!-- 優化歷史圖表 -->
+        <div class="chart-container">
+            <h3>📈 優化歷史趨勢</h3>
+            <canvas id="optimizationChart" width="400" height="200"></canvas>
+        </div>
+
+        <!-- 結果摘要表格 -->
+        <div class="summary-grid">
+            <div class="summary-card">
+                <h3>🏆 最佳性能模型</h3>
+                {% set best_model = results | sort(attribute='final_performance.tps') | last %}
+                <p><strong>{{ best_model.model_name }}</strong></p>
+                <p>TPS: {{ "%.2f"|format(best_model.final_performance.tps) }}</p>
+                <p>TTFT: {{ "%.0f"|format(best_model.final_performance.ttft * 1000) }}ms</p>
+            </div>
+
+            <div class="summary-card">
+                <h3>🎯 最佳品質模型</h3>
+                {% set best_quality = results | sort(attribute='optimal_settings.hallucination_score') | last %}
+                <p><strong>{{ best_quality.model_name }}</strong></p>
+                <p>幻覺評分: {{ "%.3f"|format(best_quality.optimal_settings.hallucination_score) }}</p>
+                <p>Temperature: {{ best_quality.optimal_settings.temperature }}</p>
+            </div>
+
+            <div class="summary-card">
+                <h3>⚡ 最快響應模型</h3>
+                {% set fastest = results | sort(attribute='final_performance.ttft') | first %}
+                <p><strong>{{ fastest.model_name }}</strong></p>
+                <p>TTFT: {{ "%.0f"|format(fastest.final_performance.ttft * 1000) }}ms</p>
+                <p>總時間: {{ "%.2f"|format(fastest.final_performance.duration) }}s</p>
+            </div>
+        </div>
+
+        <!-- 詳細結果表格 -->
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>模型名稱</th>
+                    <th>最佳設定</th>
+                    <th>性能指標</th>
+                    <th>品質評分</th>
+                    <th>優化迭代</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                <tr>
+                    <td><strong>{{ result.model_name }}</strong></td>
+                    <td>
+                        <div>Temperature: {{ result.optimal_settings.temperature }}</div>
+                        <div>Top_p: {{ result.optimal_settings.top_p }}</div>
+                        <div>Top_k: {{ result.optimal_settings.top_k }}</div>
+                        <div>Num_ctx: {{ result.optimal_settings.num_ctx }}</div>
+                        <div>Num_gpu: {{ result.optimal_settings.num_gpu }}</div>
+                    </td>
+                    <td>
+                        <div>TTFT: {{ "%.0f"|format(result.final_performance.ttft * 1000) }}ms</div>
+                        <div>TPS: {{ "%.2f"|format(result.final_performance.tps) }}</div>
+                        <div>總時間: {{ "%.2f"|format(result.final_performance.duration) }}s</div>
+                    </td>
+                    <td>
+                        {% set score = result.optimal_settings.hallucination_score %}
+                        {% if score >= 0.8 %}
+                            <span class="badge badge-excellent">{{ "%.3f"|format(score) }}</span>
+                        {% elif score >= 0.6 %}
+                            <span class="badge badge-good">{{ "%.3f"|format(score) }}</span>
+                        {% else %}
+                            <span class="badge badge-poor">{{ "%.3f"|format(score) }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ result.optimization_history|length }} 次</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- 詳細模型分析 -->
+        {% for result in results %}
+        <div class="model-details">
+            <h3>🔍 {{ result.model_name }} 詳細分析</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4>參數重要性</h4>
+                    <div class="parameter-importance">
+                        {% for param, importance in result.parameter_importance.items() %}
+                        <div class="parameter-item">
+                            {{ param }}: {{ "%.3f"|format(importance) }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div>
+                    <h4>優化歷史</h4>
+                    <div class="optimization-history">
+                        {% for item in result.optimization_history[-10:] %}
+                        <div class="history-item {% if item.is_best %}best{% endif %}">
+                            迭代 {{ item.iteration }}: {{ "%.4f"|format(item.score) }}
+                            {% if item.is_best %}(最佳){% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            {% if result.optimal_settings.detailed_evaluation %}
+            <div style="margin-top: 20px;">
+                <h4>詳細評估指標</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                    {% for metric, score in result.optimal_settings.detailed_evaluation.items() %}
+                    {% if metric != 'overall' %}
+                    <div class="parameter-item">
+                        {{ metric }}: {{ "%.3f"|format(score) }}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // 主題切換
+        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+        const currentTheme = localStorage.getItem('theme');
+        const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'dark') {
+                toggleSwitch.checked = true;
+            }
+        } else if (isDarkMode) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+            toggleSwitch.checked = true;
+        }
+
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        toggleSwitch.addEventListener('change', switchTheme, false);
+
+        // 性能對比圖表
+        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+        new Chart(performanceCtx, {
+            type: 'bar',
+            data: {
+                labels: [{% for result in results %}'{{ result.model_name }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    label: 'TPS (tokens/s)',
+                    data: [{% for result in results %}{{ result.final_performance.tps }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'TTFT (ms)',
+                    data: [{% for result in results %}{{ result.final_performance.ttft * 1000 }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'TPS'
+                        }
+                    },
+                    y1: {
+                        position: 'right',
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'TTFT (ms)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // 參數重要性圖表
+        {% if results and results[0].parameter_importance %}
+        const importanceCtx = document.getElementById('importanceChart').getContext('2d');
+        const firstResult = {{ results[0].parameter_importance | tojson }};
+        new Chart(importanceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(firstResult),
+                datasets: [{
+                    data: Object.values(firstResult),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 205, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        {% endif %}
+
+        // 優化歷史圖表
+        {% if results and results[0].optimization_history %}
+        const optimizationCtx = document.getElementById('optimizationChart').getContext('2d');
+        const history = {{ results[0].optimization_history | tojson }};
+        new Chart(optimizationCtx, {
+            type: 'line',
+            data: {
+                labels: history.map(item => item.iteration),
+                datasets: [{
+                    label: '優化評分',
+                    data: history.map(item => item.score),
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '評分'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: '迭代次數'
+                        }
+                    }
+                }
+            }
+        });
+        {% endif %}
+    </script>
+
+    <!-- 名詞解說部分 -->
+    <section class="glossary-section">
+        <div class="container">
+            <h2 class="section-title">📚 名詞解說</h2>
+            <div class="glossary-grid">
+                
+                <!-- Temperature -->
+                <div class="glossary-item">
+                    <h3 class="glossary-term">Temperature</h3>
+                    <div class="glossary-content">
+                        <p><strong>定義：</strong>控制模型產生文字的隨機性。這是最常用於調整模型「創意度」的參數。</p>
+                        <div class="glossary-details">
+                            <div class="detail-item">
+                                <span class="detail-label">較高值 (如 1.0)：</span>
+                                <span class="detail-text">回應更具多樣性、創意和豐富性。適合用於腦力激盪、寫作等任務。缺點是可能偏離主題或產生不準確的內容。</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">較低值 (如 0.3)：</span>
+                                <span class="detail-text">回應更具確定性、集中和可預測。適合用於事實問答、程式碼生成、內容摘要等需要高準確性的任務。缺點是可能顯得重複或呆板。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top-P -->
+                <div class="glossary-item">
+                    <h3 class="glossary-term">Top-P (Nucleus Sampling)</h3>
+                    <div class="glossary-content">
+                        <p><strong>定義：</strong>控制模型從累積機率達到指定閾值的詞彙中選擇下一個詞彙。</p>
+                        <div class="glossary-details">
+                            <div class="detail-item">
+                                <span class="detail-label">較高值 (如 0.9)：</span>
+                                <span class="detail-text">考慮更多可能的詞彙，增加回應的多樣性和創意性。適合需要豐富表達的任務。</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">較低值 (如 0.3)：</span>
+                                <span class="detail-text">只考慮最可能的詞彙，提高回應的準確性和一致性。適合需要精確答案的任務。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top-K -->
+                <div class="glossary-item">
+                    <h3 class="glossary-term">Top-K</h3>
+                    <div class="glossary-content">
+                        <p><strong>定義：</strong>限制模型在選擇下一個詞彙時只考慮機率最高的前K個詞彙。</p>
+                        <div class="glossary-details">
+                            <div class="detail-item">
+                                <span class="detail-label">較高值 (如 100)：</span>
+                                <span class="detail-text">考慮更多詞彙選項，增加回應的多樣性。適合創意寫作和開放性問題。</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">較低值 (如 10)：</span>
+                                <span class="detail-text">只考慮最可能的詞彙，提高回應的準確性和可預測性。適合事實性問答。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Num_ctx -->
+                <div class="glossary-item">
+                    <h3 class="glossary-term">Num_ctx (Context Window)</h3>
+                    <div class="glossary-content">
+                        <p><strong>定義：</strong>設定模型能夠處理的上下文窗口大小，即輸入和輸出文字的總長度限制。</p>
+                        <div class="glossary-details">
+                            <div class="detail-item">
+                                <span class="detail-label">較大值 (如 8192)：</span>
+                                <span class="detail-text">能夠處理更長的對話和文檔，適合複雜任務和長文本分析。但會消耗更多記憶體。</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">較小值 (如 1024)：</span>
+                                <span class="detail-text">節省記憶體和計算資源，適合簡單問答和短文本處理。但可能無法處理複雜的長文本。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Num_gpu -->
+                <div class="glossary-item">
+                    <h3 class="glossary-term">Num_gpu</h3>
+                    <div class="glossary-content">
+                        <p><strong>定義：</strong>指定模型在GPU上運行的層數，影響計算速度和記憶體使用。</p>
+                        <div class="glossary-details">
+                            <div class="detail-item">
+                                <span class="detail-label">較高值 (如 50-100)：</span>
+                                <span class="detail-text">更多層在GPU上運行，提高生成速度。但需要更多GPU記憶體。</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">較低值 (如 0-20)：</span>
+                                <span class="detail-text">減少GPU記憶體使用，適合記憶體有限的環境。但可能降低生成速度。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TTFT -->
+                <div class="glossary-item">
+                    <h3 class="glossary-term">TTFT (Time To First Token)</h3>
+                    <div class="glossary-content">
+                        <p><strong>定義：</strong>從發送請求到收到第一個詞彙回應所需的時間。</p>
+                        <div class="glossary-details">
+                            <div class="detail-item">
+                                <span class="detail-label">較低值 (如 < 1秒)：</span>
+                                <span class="detail-text">回應速度快，用戶體驗良好。適合即時對話和互動應用。</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">較高值 (如 > 5秒)：</span>
+                                <span class="detail-text">回應延遲較長，可能影響用戶體驗。通常與模型大小和硬體配置相關。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TPS -->
+                <div class="glossary-item">
+                    <h3 class="glossary-term">TPS (Tokens Per Second)</h3>
+                    <div class="glossary-content">
+                        <p><strong>定義：</strong>模型每秒生成的詞彙數量，衡量生成速度的指標。</p>
+                        <div class="glossary-details">
+                            <div class="detail-item">
+                                <span class="detail-label">較高值 (如 > 50)：</span>
+                                <span class="detail-text">生成速度快，適合需要快速產生大量文字的應用。</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">較低值 (如 < 10)：</span>
+                                <span class="detail-text">生成速度較慢，可能影響長文本生成的效率。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hallucination Score -->
+                <div class="glossary-item">
+                    <h3 class="glossary-term">Hallucination Score</h3>
+                    <div class="glossary-content">
+                        <p><strong>定義：</strong>評估模型產生虛假或不準確資訊的程度，分數越高表示越準確。</p>
+                        <div class="glossary-details">
+                            <div class="detail-item">
+                                <span class="detail-label">較高值 (如 > 0.8)：</span>
+                                <span class="detail-text">模型回應準確性高，很少產生虛假資訊。適合需要高可信度的應用。</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">較低值 (如 < 0.5)：</span>
+                                <span class="detail-text">模型可能產生較多不準確的資訊，需要額外驗證。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bayesian Optimization -->
+                <div class="glossary-item">
+                    <h3 class="glossary-term">貝葉斯優化 (Bayesian Optimization)</h3>
+                    <div class="glossary-content">
+                        <p><strong>定義：</strong>一種智能的參數調優算法，使用高斯過程來建模目標函數，並通過採集函數選擇下一個測試點。</p>
+                        <div class="glossary-details">
+                            <div class="detail-item">
+                                <span class="detail-label">優勢：</span>
+                                <span class="detail-text">比網格搜尋更有效率，能夠在較少測試次數內找到較好的參數組合。</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">適用場景：</span>
+                                <span class="detail-text">參數空間較大、評估成本較高的優化問題。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Early Stopping -->
+                <div class="glossary-item">
+                    <h3 class="glossary-term">早期停止 (Early Stopping)</h3>
+                    <div class="glossary-content">
+                        <p><strong>定義：</strong>當優化過程無法取得顯著改善時，提前結束測試的機制。</p>
+                        <div class="glossary-details">
+                            <div class="detail-item">
+                                <span class="detail-label">目的：</span>
+                                <span class="detail-text">節省計算資源和時間，避免無效的測試。</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">觸發條件：</span>
+                                <span class="detail-text">連續多次迭代沒有顯著改善，或已達到預設的停止條件。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .glossary-section {
+            background: var(--bg-color);
+            padding: 60px 0;
+            margin-top: 40px;
+        }
+
+        .glossary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .glossary-item {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glossary-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .glossary-term {
+            color: #2c3e50;
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .glossary-content p {
+            color: #34495e;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .glossary-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .detail-item {
+            background: rgba(52, 152, 219, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .detail-label {
+            display: block;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .detail-text {
+            color: #34495e;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .glossary-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .glossary-item {
+                padding: 20px;
+            }
+
+            .glossary-term {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</body>
+</html>
