@@ -23,6 +23,9 @@ src/
 │   └── bayesian_optimizer.py
 ├── ui/                 # Web UI 模組
 │   ├── web_interface.py
+│   ├── locales
+│   │   ├── en.json
+│   │   └── zh.json
 │   └── templates/
 │       └── index.html
 └── utils/              # 工具模組
@@ -107,24 +110,6 @@ src/
 - **Web UI (可選)**: `Flask`, `Flask-SocketIO`
 - **圖表生成 (可選)**: `matplotlib`, `seaborn`
 
-## 📝 更新日誌
-
-### v3.0.0 (最新)
-- ✨ **新增功能**：建立了功能完善的互動式 Web UI，用於即時監控和控制。
-- 🐛 **錯誤修復**：修復了命令列參數無法正常工作的問題。
-- 🐛 **錯誤修復**：修正了因 `ollama` 函式庫 API 變更導致無法正確讀取模型列表的問題。
-- 🐛 **錯誤修復**：修復了 Web UI 中的多個 JavaScript 錯誤和時序問題。
-- 🎨 **樣式改進**：統一了 HTML 報告中的背景樣式，使其能正確響應主題切換。
-- 🏗️ **架構重構**：重構了 Web UI 的啟動和資料處理流程，使其更穩定。
-
-### v2.0.0
-- ✨ 新增貝葉斯優化算法
-- 🧠 實時記憶體監控
-- 💾 智能緩存系統
-- 📊 增強評估指標
-- 🎨 互動式報告
-- 🏗️ 模組化架構重構
-
 ---
 
 # 🚀 Enhanced Ollama Auto-Tuner - Intelligent Optimization & Monitoring Tool for Local LLMs
@@ -139,6 +124,27 @@ The Enhanced Ollama Auto-Tuner is a Python tool designed to automatically find o
 - **Comprehensive Performance Optimization**: Includes GPU/CPU memory monitoring and smart caching to ensure a stable and efficient testing process.
 - **Enhanced Evaluation System**: Provides a comprehensive quality score from multiple dimensions like relevance, logical consistency, and factual accuracy.
 - **Detailed Visual Reports**: Generates interactive HTML reports with dynamic charts upon completion.
+
+### 🏗️ Modular architecture
+```
+src/
+├── core/               # Core functional modules
+│   ├── enhanced_tuner.py
+│   └── enhanced_evaluator.py
+├── models/             # Optimization algorithm module
+│   └── bayesian_optimizer.py
+├── ui/                 # Web UI modules
+│   ├── web_interface.py
+│   ├── locales
+│   │   ├── en.json
+│   │   └── zh.json
+│   └── templates/
+│       └── index.html
+└── utils/              # Tool modules
+    ├── memory_monitor.py
+    ├── cache_manager.py
+    └── ollama_utils.py
+```
 
 ## 🚀 How to Use
 
@@ -171,4 +177,10 @@ This tool offers two modes of operation: the interactive Web UI (recommended) an
     ```bash
     # Specify a single model to test
     python enhanced_ollama_autotuner.py --model llama3:8b
+
+    # Define times and TTFT limit
+    python enhanced_ollama_autotuner.py --time-limit 120 --ttft-limit 5
+
+    # Enable more detials report
+    python enhanced_ollama_autotuner.py --verbose
     ```
