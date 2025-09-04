@@ -11,8 +11,6 @@ import logging
 class CacheManager:
     def __init__(self, cache_dir: str = ".cache", max_age_hours: int = 24):
         """
-        初始化緩存管理器
-        
         Args:
             cache_dir: 緩存目錄
             max_age_hours: 緩存最大保存時間（小時）
@@ -44,8 +42,6 @@ class CacheManager:
     
     def get(self, model_name: str, parameters: Dict[str, Any]) -> Optional[Dict]:
         """
-        獲取緩存結果
-        
         Args:
             model_name: 模型名稱
             parameters: 測試參數
@@ -76,8 +72,6 @@ class CacheManager:
     
     def set(self, model_name: str, parameters: Dict[str, Any], result: Dict[str, Any]):
         """
-        設置緩存結果
-        
         Args:
             model_name: 模型名稱
             parameters: 測試參數
@@ -104,8 +98,6 @@ class CacheManager:
     
     def clear(self, model_name: Optional[str] = None):
         """
-        清理緩存
-        
         Args:
             model_name: 如果指定，只清理該模型的緩存
         """
@@ -155,7 +147,6 @@ class CacheManager:
                         expired_count += 1
                         
                 except Exception:
-                    # 如果檔案損壞，直接刪除
                     os.remove(file_path)
                     expired_count += 1
             
@@ -208,8 +199,6 @@ class CacheManager:
     def get_similar_results(self, model_name: str, parameters: Dict[str, Any], 
                           tolerance: float = 0.1) -> List[Dict]:
         """
-        獲取相似參數的結果
-        
         Args:
             model_name: 模型名稱
             parameters: 目標參數

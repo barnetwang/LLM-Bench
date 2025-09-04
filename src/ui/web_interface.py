@@ -6,10 +6,12 @@ from flask_socketio import SocketIO, emit
 import logging
 from typing import Dict, Any, List
 
+
 class WebInterface:
     def __init__(self, template_folder: str = 'templates'):
-        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-        self.app = Flask(__name__, 
+        project_root = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), '..', '..'))
+        self.app = Flask(__name__,
                          template_folder=template_folder,
                          static_folder=project_root,
                          static_url_path='')
@@ -27,20 +29,40 @@ class WebInterface:
 
     def set_available_models(self, models: List[str]):
         self.available_models = models
-        self.logger.info("Broadcasting available_models event with data: %s", {'models': self.available_models})
-        self.socketio.emit('available_models', {'models': self.available_models})
+        self.logger.info("Broadcasting available_models event with data: %s", {
+                         'models': self.available_models})
+        self.socketio.emit('available_models', {
+                           'models': self.available_models})
 
     def _register_routes(self):
+        def _load_translations(lang: str) -> dict:
+            locales_dir = os.path.join(os.path.dirname(__file__), 'locales')
+            lang_file = os.path.join(locales_dir, f"{lang}.json")
+            try:
+                import json
+                with open(lang_file, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except Exception:
+                self.logger.debug(
+                    "Failed to load locale %s, falling back to en", lang)
+                try:
+                    with open(os.path.join(locales_dir, 'en.json'), 'r', encoding='utf-8') as f:
+                        return json.load(f)
+                except Exception:
+                    return {}
+
         @self.app.route('/')
         def index():
-            return render_template('index.html')
-        
+            lang = request.args.get(
+                'lang') or request.cookies.get('lang') or 'en'
+            translations = _load_translations(lang)
+            return render_template('index.html', translations=translations, current_lang=lang)
+
         @self.app.route('/api/status')
         def get_status():
             return jsonify(self.status)
-        
+
     def _register_socketio_events(self):
-        """註冊 Socket.IO 事件"""
         @self.socketio.on('connect')
         def handle_connect():
             self.logger.info("Web UI 客戶端已連接")
@@ -57,43 +79,48 @@ class WebInterface:
 
         @self.socketio.on('start_tuning')
         def handle_start_tuning(data): pass
-        
+
         @self.socketio.on('stop_tuning')
         def handle_stop_tuning(): pass
 
         @self.socketio.on('generate_report')
         def handle_generate_report(): pass
-    
+
     def run(self, host: str = '127.0.0.1', port: int = 5000, debug: bool = False):
-        self.socketio.run(self.app, host=host, port=port, debug=debug, allow_unsafe_werkzeug=True)
-    
+        self.socketio.run(self.app, host=host, port=port,
+                          debug=debug, allow_unsafe_werkzeug=True)
+
     def set_status(self, state: str, message: str):
         self.status = {'state': state, 'message': message}
         self.socketio.emit('status_update', self.status)
         self.add_log_message('info', message)
-    
+
     def add_log_message(self, level: str, message: str):
         log_entry = {'level': level, 'message': message}
         self.log_messages.append(log_entry)
-        if len(self.log_messages) > 100: self.log_messages.pop(0)
+        if len(self.log_messages) > 100:
+            self.log_messages.pop(0)
         self.socketio.emit('log_update', [log_entry])
-    
+
     def update_memory_usage(self, data: Dict[str, Any]):
         self.memory_usage = data
         self.socketio.emit('memory_update', self.memory_usage)
-    
+
     def update_cache_stats(self, data: Dict[str, Any]):
         self.cache_stats = data
         self.socketio.emit('cache_update', self.cache_stats)
-    
+
     def add_tuning_result(self, result: Dict[str, Any]):
         self.tuning_results.append(result)
         self.socketio.emit('new_result', result)
 
+
 web_ui = WebInterface()
+
 
 def get_web_ui() -> WebInterface:
     return web_ui
+
 
 def start_web_ui(host: str = '127.0.0.1', port: int = 5000, debug: bool = False):
     global web_ui

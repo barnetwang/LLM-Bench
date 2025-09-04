@@ -14,8 +14,6 @@ class BayesianOptimizer:
                  n_initial_points: int = 5, n_iterations: int = 20,
                  acquisition_function: str = 'ei'):
         """
-        初始化貝葉斯優化器
-        
         Args:
             param_bounds: 參數邊界，格式為 {'param_name': (min_val, max_val)}
             n_initial_points: 初始隨機點數量
@@ -100,7 +98,6 @@ class BayesianOptimizer:
             raise ValueError(f"不支援的採集函數: {self.acquisition_function}")
     
     def _optimize_acquisition(self, n_restarts: int = 10) -> Dict[str, float]:
-        """優化採集函數以找到下一個測試點"""
         best_acq = -np.inf
         best_params = None
         
@@ -129,9 +126,7 @@ class BayesianOptimizer:
             return self._optimize_acquisition()
     
     def update(self, params: Dict[str, float], score: float):
-        """
-        更新優化器
-        
+        """     
         Args:
             params: 測試的參數組合
             score: 獲得的評分
@@ -165,8 +160,6 @@ class BayesianOptimizer:
     
     def predict_score(self, params: Dict[str, float]) -> Tuple[float, float]:
         """
-        預測參數組合的評分
-        
         Returns:
             (預測評分, 不確定性)
         """
@@ -195,8 +188,6 @@ class AdaptiveBayesianOptimizer(BayesianOptimizer):
                  n_initial_points: int = 5, n_iterations: int = 20,
                  early_stopping_patience: int = 5, improvement_threshold: float = 0.01):
         """
-        初始化自適應貝葉斯優化器
-        
         Args:
             early_stopping_patience: 早停耐心值
             improvement_threshold: 改進閾值

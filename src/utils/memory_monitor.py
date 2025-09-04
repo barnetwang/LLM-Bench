@@ -15,13 +15,6 @@ except ImportError:
 
 class MemoryMonitor:
     def __init__(self, warning_threshold: float = 0.8, critical_threshold: float = 0.95):
-        """
-        初始化記憶體監控器
-        
-        Args:
-            warning_threshold: 警告閾值 (0.8 = 80%)
-            critical_threshold: 嚴重閾值 (0.95 = 95%)
-        """
         self.warning_threshold = warning_threshold
         self.critical_threshold = critical_threshold
         self.monitoring = False
@@ -76,18 +69,18 @@ class MemoryMonitor:
             'warnings': [],
             'critical': False
         }
-        if system_memory['percent'] > self.critical_threshold * 100:
-            status['critical'] = True
-            status['warnings'].append(f"系統記憶體使用率過高: {system_memory['percent']:.1f}%")
-        elif system_memory['percent'] > self.warning_threshold * 100:
-            status['warnings'].append(f"系統記憶體使用率較高: {system_memory['percent']:.1f}%")
-        for gpu in gpu_memory:
-            if gpu['memory_percent'] > self.critical_threshold * 100:
-                status['critical'] = True
-                status['warnings'].append(f"GPU {gpu['id']} 記憶體使用率過高: {gpu['memory_percent']:.1f}%")
-            elif gpu['memory_percent'] > self.warning_threshold * 100:
-                status['warnings'].append(f"GPU {gpu['id']} 記憶體使用率較高: {gpu['memory_percent']:.1f}%")
-        
+       # if system_memory['percent'] > self.critical_threshold * 100:
+       #     status['critical'] = True
+       #     status['warnings'].append(f"系統記憶體使用率過高: {system_memory['percent']:.1f}%")
+       # elif system_memory['percent'] > self.warning_threshold * 100:
+       #     status['warnings'].append(f"系統記憶體使用率較高: {system_memory['percent']:.1f}%")
+       # for gpu in gpu_memory:
+       #     if gpu['memory_percent'] > self.critical_threshold * 100:
+       #         status['critical'] = True
+       #         status['warnings'].append(f"GPU {gpu['id']} 記憶體使用率過高: {gpu['memory_percent']:.1f}%")
+       #     elif gpu['memory_percent'] > self.warning_threshold * 100:
+       #         status['warnings'].append(f"GPU {gpu['id']} 記憶體使用率較高: {gpu['memory_percent']:.1f}%")
+       # 
         return status
     
     def add_callback(self, callback: Callable[[Dict], None]):
@@ -138,7 +131,7 @@ class MemoryMonitor:
         if not self.history:
             return {}
         
-        recent_history = self.history[-100:]  # 最近100個記錄
+        recent_history = self.history[-100:]
         
         system_memory_avg = sum(h['system_memory']['percent'] for h in recent_history) / len(recent_history)
         system_memory_max = max(h['system_memory']['percent'] for h in recent_history)
@@ -171,8 +164,11 @@ class MemoryMonitor:
         return summary
     
     def is_memory_safe(self) -> bool:
-        status = self.get_memory_status()
-        return not status['critical'] and not status['warnings']
+        system_memory = self.get_system_memory_info()
+        if system_memory['percent'] > self.critical_threshold * 100:
+            self.logger.critical(f"系統記憶體使用率過高: {system_memory['percent']:.1f}%，暫停以策安全。")
+            return False
+        return True
     
     def get_available_memory(self) -> Dict:
         system_memory = self.get_system_memory_info()

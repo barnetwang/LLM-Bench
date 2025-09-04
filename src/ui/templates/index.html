@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ollama Auto-Tuner 監控面板</title>
+    <title>{{ translations.get('title', 'Ollama Auto-Tuner Dashboard') }}</title>
     <style>
         :root {
             --bg-color: #1a1b26;
@@ -19,6 +20,7 @@
             --button-hover-bg: #9dacfa;
             --button-disabled-bg: #565f89;
         }
+
         body {
             font-family: 'Segoe UI', 'Roboto', sans-serif;
             background-color: var(--bg-color);
@@ -27,84 +29,218 @@
             padding: 20px;
             font-size: 16px;
         }
-        .container { max-width: 1400px; margin: auto; }
-        h1 { color: var(--header-color); text-align: center; }
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+
+        .container {
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        h1 {
+            color: var(--header-color);
+            text-align: center;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
         .card {
             background-color: var(--card-bg);
             padding: 20px;
             border-radius: 10px;
             border: 1px solid var(--border-color);
         }
-        .card h2 { margin-top: 0; color: var(--info-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-        #status-box { text-align: center; }
-        #status-message { font-size: 1.2em; font-weight: bold; padding: 15px; border-radius: 8px; transition: all 0.3s; }
-        .status-idle { background-color: var(--border-color); color: var(--text-color); }
-        .status-running { background-color: var(--warning-color); color: var(--bg-color); }
-        .status-completed { background-color: var(--success-color); color: var(--bg-color); }
-        .status-error { background-color: var(--error-color); color: var(--bg-color); }
-        .status-stopped { background-color: #ff9e64; color: var(--bg-color); }
-        .controls button, .controls select { 
-            padding: 10px 15px; font-size: 1em; border: none; border-radius: 5px; cursor: pointer; 
-            background-color: var(--button-bg); color: var(--bg-color); margin: 5px; 
+
+        .card h2 {
+            margin-top: 0;
+            color: var(--info-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
         }
-        .controls button:hover { background-color: var(--button-hover-bg); }
-        .controls button:disabled { background-color: var(--button-disabled-bg); cursor: not-allowed; }
-        #log-container { height: 300px; overflow-y: auto; background-color: #16161e; padding: 10px; border-radius: 5px; }
-        .log-entry { margin-bottom: 5px; border-left: 3px solid; padding-left: 8px; }
-        .log-info { border-color: var(--info-color); }
-        .log-warning { border-color: var(--warning-color); }
-        .log-error { border-color: var(--error-color); }
-        #results-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        #results-table th, #results-table td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border-color); }
-        #results-table th { color: var(--info-color); }
-        .progress-bar { width: 100%; background-color: var(--border-color); border-radius: 5px; overflow: hidden; }
-        .progress-bar-inner { height: 20px; background-color: var(--success-color); width: 0%; text-align: center; line-height: 20px; color: var(--bg-color); transition: width 0.4s; }
+
+        #status-box {
+            text-align: center;
+        }
+
+        #status-message {
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .status-idle {
+            background-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .status-running {
+            background-color: var(--warning-color);
+            color: var(--bg-color);
+        }
+
+        .status-completed {
+            background-color: var(--success-color);
+            color: var(--bg-color);
+        }
+
+        .status-error {
+            background-color: var(--error-color);
+            color: var(--bg-color);
+        }
+
+        .status-stopped {
+            background-color: #ff9e64;
+            color: var(--bg-color);
+        }
+
+        .controls button,
+        .controls select {
+            padding: 10px 15px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: var(--button-bg);
+            color: var(--bg-color);
+            margin: 5px;
+        }
+
+        .controls button:hover {
+            background-color: var(--button-hover-bg);
+        }
+
+        .controls button:disabled {
+            background-color: var(--button-disabled-bg);
+            cursor: not-allowed;
+        }
+
+        #log-container {
+            height: 300px;
+            overflow-y: auto;
+            background-color: #16161e;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            border-left: 3px solid;
+            padding-left: 8px;
+        }
+
+        .log-info {
+            border-color: var(--info-color);
+        }
+
+        .log-warning {
+            border-color: var(--warning-color);
+        }
+
+        .log-error {
+            border-color: var(--error-color);
+        }
+
+        #results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        #results-table th,
+        #results-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        #results-table th {
+            color: var(--info-color);
+        }
+
+        .progress-bar {
+            width: 100%;
+            background-color: var(--border-color);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar-inner {
+            height: 20px;
+            background-color: var(--success-color);
+            width: 0%;
+            text-align: center;
+            line-height: 20px;
+            color: var(--bg-color);
+            transition: width 0.4s;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="container">
-        <h1>Ollama Auto-Tuner 監控面板</h1>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1 id="app-title">{{ translations.get('title', 'Ollama Auto-Tuner Dashboard') }}</h1>
+            <div>
+                <label for="lang-select" style="margin-right:8px;color:var(--text-color);">Language</label>
+                <select id="lang-select">
+                    <option value="en" {% if current_lang=='en' %}selected{% endif %}>English</option>
+                    <option value="zh" {% if current_lang=='zh' %}selected{% endif %}>中文</option>
+                </select>
+            </div>
+        </div>
 
         <div class="card" id="status-box">
-            <h2>狀態</h2>
-            <div id="status-message" class="status-idle">等待連接...</div>
+            <h2 id="status-heading">{{ translations.get('status_heading', 'Status') }}</h2>
+            <div id="status-message" class="status-idle">{{ translations.get('waiting', 'Waiting for connection...') }}
+            </div>
             <div class="controls">
-                <select id="model-select"><option value="">所有模型</option></select>
-                <button id="start-btn">開始調校</button>
-                <button id="stop-btn" disabled>停止調校</button>
-                <button id="report-btn" disabled>產生完整報告</button>
+                <select id="model-select">
+                    <option value="">{{ translations.get('all_models', 'All Models') }}</option>
+                </select>
+                <button id="start-btn">{{ translations.get('start_tuning', 'Start Tuning') }}</button>
+                <button id="stop-btn" disabled>{{ translations.get('stop_tuning', 'Stop Tuning') }}</button>
+                <button id="report-btn" disabled>{{ translations.get('generate_report', 'Generate Report') }}</button>
             </div>
         </div>
 
         <div class="grid-container">
             <div class="card">
-                <h2>系統資訊</h2>
+                <h2 id="system-info-heading">{{ translations.get('system_info', 'System Info') }}</h2>
                 <div id="system-info">
-                    <p><strong>系統記憶體:</strong> <span id="sys-mem">N/A</span></p>
-                    <div class="progress-bar"><div id="sys-mem-bar" class="progress-bar-inner"></div></div>
-                    <p style="margin-top: 15px;"><strong>GPU 記憶體:</strong></p>
+                    <p><strong id="sys-mem-label">{{ translations.get('system_memory', 'System Memory:') }}</strong>
+                        <span id="sys-mem">N/A</span></p>
+                    <div class="progress-bar">
+                        <div id="sys-mem-bar" class="progress-bar-inner"></div>
+                    </div>
+                    <p style="margin-top: 15px;"><strong id="gpu-mem-label">{{ translations.get('gpu_memory', 'GPU
+                            Memory:') }}</strong></p>
                     <div id="gpu-info">N/A</div>
-                    <p style="margin-top: 15px;"><strong>緩存:</strong> <span id="cache-info">N/A</span></p>
+                    <p style="margin-top: 15px;"><strong id="cache-label">{{ translations.get('cache', 'Cache:')
+                            }}</strong> <span id="cache-info">N/A</span></p>
                 </div>
             </div>
 
             <div class="card">
-                <h2>日誌</h2>
+                <h2 id="logs-heading">{{ translations.get('logs', 'Logs') }}</h2>
                 <div id="log-container"></div>
             </div>
         </div>
 
         <div class="card" style="margin-top: 20px;">
-            <h2>調校結果 (即時)</h2>
+            <h2 id="results-heading">{{ translations.get('tuning_results', 'Tuning Results (Live)') }}</h2>
             <table id="results-table">
                 <thead>
                     <tr>
-                        <th>模型</th>
-                        <th>最佳設定</th>
-                        <th>性能 (TPS)</th>
-                        <th>品質評分</th>
+                        <th id="col-model">{{ translations.get('model', 'Model') }}</th>
+                        <th id="col-settings">{{ translations.get('best_settings', 'Best Settings') }}</th>
+                        <th id="col-performance">{{ translations.get('performance', 'Performance (TPS)') }}</th>
+                        <th id="col-quality">{{ translations.get('quality_score', 'Quality Score') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -115,7 +251,53 @@
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        // translations object injected from server
+        const TRANSLATIONS = {{ translations | tojson | safe }} || {};
+        const CURRENT_LANG = '{{ current_lang }}' || 'en';
+        function setLangCookie(lang) {
+            document.cookie = `lang=${lang};path=/`;
+        }
+        function applyStaticTranslations() {
+            // some elements already rendered server-side; update a few dynamic ones
+            const modelSelect = document.getElementById('model-select');
+            if (modelSelect) {
+                if (modelSelect.options && modelSelect.options.length > 0) {
+                    modelSelect.options[0].text = TRANSLATIONS['all_models'] || 'All Models';
+                }
+            }
+            document.getElementById('app-title').textContent = TRANSLATIONS['title'] || 'Ollama Auto-Tuner Dashboard';
+            document.getElementById('status-heading').textContent = TRANSLATIONS['status_heading'] || 'Status';
+            document.getElementById('sys-mem-label').textContent = TRANSLATIONS['system_memory'] || 'System Memory:';
+            document.getElementById('gpu-mem-label').textContent = TRANSLATIONS['gpu_memory'] || 'GPU Memory:';
+            document.getElementById('cache-label').textContent = TRANSLATIONS['cache'] || 'Cache:';
+            document.getElementById('logs-heading').textContent = TRANSLATIONS['logs'] || 'Logs';
+            document.getElementById('results-heading').textContent = TRANSLATIONS['tuning_results'] || 'Tuning Results (Live)';
+            document.getElementById('col-model').textContent = TRANSLATIONS['model'] || 'Model';
+            document.getElementById('col-settings').textContent = TRANSLATIONS['best_settings'] || 'Best Settings';
+            document.getElementById('col-performance').textContent = TRANSLATIONS['performance'] || 'Performance (TPS)';
+            document.getElementById('col-quality').textContent = TRANSLATIONS['quality_score'] || 'Quality Score';
+            // buttons
+            document.getElementById('start-btn').textContent = TRANSLATIONS['start_tuning'] || 'Start Tuning';
+            document.getElementById('stop-btn').textContent = TRANSLATIONS['stop_tuning'] || 'Stop Tuning';
+            document.getElementById('report-btn').textContent = TRANSLATIONS['generate_report'] || 'Generate Report';
+        }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            applyStaticTranslations();
+
+            // language selector
+            const langSelect = document.getElementById('lang-select');
+            if (langSelect) {
+                langSelect.addEventListener('change', (e) => {
+                    const v = e.target.value;
+                    setLangCookie(v);
+                    // reload with lang param to ensure server renders with chosen locale
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('lang', v);
+                    window.location.href = url.toString();
+                });
+            }
             const socket = io();
 
             const statusMessage = document.getElementById('status-message');
@@ -125,19 +307,19 @@
             const modelSelect = document.getElementById('model-select');
             const logContainer = document.getElementById('log-container');
             const resultsTableBody = document.querySelector('#results-table tbody');
-            
+
             const sysMemSpan = document.getElementById('sys-mem');
             const sysMemBar = document.getElementById('sys-mem-bar');
             const gpuInfoDiv = document.getElementById('gpu-info');
             const cacheInfoSpan = document.getElementById('cache-info');
 
             socket.on('connect', () => {
-                statusMessage.textContent = '已連接到後端服務';
+                statusMessage.textContent = TRANSLATIONS['connect_success'] || 'Connected to backend service';
                 statusMessage.className = 'status-idle';
             });
 
             socket.on('disconnect', () => {
-                statusMessage.textContent = '與後端服務斷開連接';
+                statusMessage.textContent = TRANSLATIONS['connect_disconnect'] || 'Disconnected from backend service';
                 statusMessage.className = 'status-error';
                 startBtn.disabled = true;
                 stopBtn.disabled = true;
@@ -177,13 +359,13 @@
                     sysMemBar.style.width = `${(sys.current_percent || 0)}%`;
                     sysMemBar.textContent = `${(sys.current_percent || 0).toFixed(1)}%`;
                 }
-                
+
                 if (data.gpu_memory && typeof data.gpu_memory === 'object' && Object.keys(data.gpu_memory).length > 0) {
                     let gpuHtml = '';
                     for (const [id, gpu] of Object.entries(data.gpu_memory)) {
                         if (gpu && typeof gpu === 'object') {
-                           gpuHtml += `<p style="margin: 5px 0;"><strong>GPU ${id} (${gpu.name || 'N/A'}):</strong> ${(gpu.current_percent || 0).toFixed(1)}%</p>`;
-                           gpuHtml += `<div class="progress-bar"><div class="progress-bar-inner" style="width: ${(gpu.current_percent || 0)}%;">${(gpu.current_percent || 0).toFixed(1)}%</div></div>`;
+                            gpuHtml += `<p style="margin: 5px 0;"><strong>GPU ${id} (${gpu.name || 'N/A'}):</strong> ${(gpu.current_percent || 0).toFixed(1)}%</p>`;
+                            gpuHtml += `<div class="progress-bar"><div class="progress-bar-inner" style="width: ${(gpu.current_percent || 0)}%;">${(gpu.current_percent || 0).toFixed(1)}%</div></div>`;
                         }
                     }
                     gpuInfoDiv.innerHTML = gpuHtml;
@@ -202,10 +384,10 @@
                 if (!result) return;
                 const row = resultsTableBody.insertRow();
                 row.insertCell(0).textContent = result.model_name || 'N/A';
-                
+
                 let settingsHtml = '';
-                if(result.optimal_settings && typeof result.optimal_settings === 'object'){
-                    for(const [key, value] of Object.entries(result.optimal_settings)){
+                if (result.optimal_settings && typeof result.optimal_settings === 'object') {
+                    for (const [key, value] of Object.entries(result.optimal_settings)) {
                         if (typeof value === 'number') {
                             settingsHtml += `<div><strong>${key}:</strong> ${value.toFixed(3)}</div>`;
                         } else if (typeof value !== 'object') {
@@ -223,7 +405,7 @@
             });
 
             socket.on('available_models', (data) => {
-                modelSelect.innerHTML = '<option value="">所有模型</option>';
+                modelSelect.innerHTML = `<option value="">${TRANSLATIONS['all_models'] || 'All Models'}</option>`;
                 if (data && data.models) {
                     data.models.forEach(m => {
                         const option = document.createElement('option');
@@ -256,4 +438,5 @@
         });
     </script>
 </body>
+
 </html>

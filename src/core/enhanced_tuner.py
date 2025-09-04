@@ -6,6 +6,7 @@ import multiprocessing
 import sys
 import os
 import logging
+import threading
 from typing import Dict, List, Any, Optional, Tuple
 from queue import Empty
 
@@ -16,13 +17,14 @@ from src.core.enhanced_evaluator import get_enhanced_evaluator, get_evaluation_d
 from evaluation_dataset import HALLUCINATION_EVAL_SET, LONG_CONTEXT_PERFORMANCE_PROMPT
 
 class EnhancedOllamaTuner:  
-    def __init__(self, model_name: str, constraints: Optional[Dict] = None):
+    def __init__(self, model_name: str, constraints: Optional[Dict] = None, stop_event: Optional[threading.Event] = None): # <<< 修改這一行
         """
         初始化增強調校器
         
         Args:
             model_name: 模型名稱
             constraints: 約束條件
+            stop_event: 用於從外部停止執行的 threading.Event
         """
         self.model_name = model_name
         self.constraints = constraints or {
@@ -31,6 +33,7 @@ class EnhancedOllamaTuner:
             "hallucination_threshold": 0.95,
             "num_predict": 256
         }
+        self.stop_event = stop_event
         self.memory_monitor = get_memory_monitor()
         self.cache_manager = get_cache_manager()
         self.evaluator = get_enhanced_evaluator()
@@ -147,6 +150,10 @@ class EnhancedOllamaTuner:
         max_iterations = 25
         
         while iteration < max_iterations:
+            if self.stop_event and self.stop_event.is_set():
+                self.logger.info("接收到停止信號，中斷品質調校")
+                return "stopped"
+
             if not self._check_memory_safety():
                 time.sleep(5)
                 continue
@@ -196,6 +203,10 @@ class EnhancedOllamaTuner:
         self.logger.info("開始上下文窗口調校")
         
         for ctx_size in ctx_options:
+            if self.stop_event and self.stop_event.is_set():
+                self.logger.info("接收到停止信號，中斷上下文窗口調校")
+                return False
+
             if not self._check_memory_safety():
                 time.sleep(5)
                 continue
@@ -229,6 +240,10 @@ class EnhancedOllamaTuner:
         best_working_gpu = 0
         
         while low < high:
+            if self.stop_event and self.stop_event.is_set():
+                self.logger.info("接收到停止信號，中斷 GPU 層數調校")
+                return False, {}
+
             if not self._check_memory_safety():
                 time.sleep(5)
                 continue
@@ -295,11 +310,17 @@ class EnhancedOllamaTuner:
     def run(self) -> Optional[Dict]:
         try:
             self.logger.info(f"開始為模型 '{self.model_name}' 進行增強調校")
+            
             quality_status = self.tune_quality_bayesian()
-            if quality_status == "incompatible":
-                return "incompatible"
+            if (self.stop_event and self.stop_event.is_set()) or quality_status == "stopped": return None
+            if quality_status == "incompatible": return "incompatible"
+            
             self.tune_context_window()
+            if self.stop_event and self.stop_event.is_set(): return None
+
             success, final_performance = self.tune_gpu_layers()
+            if self.stop_event and self.stop_event.is_set(): return None
+
             final_settings = self.best_settings.copy()
             final_settings['num_predict'] = self.constraints['num_predict']
             

@@ -35,6 +35,7 @@ class WebIntegratedTuner:
         self.web_ui = get_web_ui()
         self.tuning_thread = None
         self.is_tuning = False
+        self.stop_event = threading.Event()
         self.all_results = []
         
         self.memory_monitor = get_memory_monitor()
@@ -112,13 +113,18 @@ class WebIntegratedTuner:
     def start_tuning_from_web(self, data):
         if self.is_tuning: return self.web_ui.add_log_message('warning', '調校已在運行中')
         self.all_results = []
+        self.stop_event.clear()
         model_to_run = data.get('model_name') if data and data.get('model_name') else None
         self.is_tuning = True
         self.tuning_thread = threading.Thread(target=self.run_tuning_logic, args=(model_to_run,), daemon=True)
         self.tuning_thread.start()
 
     def stop_tuning_from_web(self):
-        if self.is_tuning: self.is_tuning = False; self.web_ui.set_status('stopped', '正在停止調校...'); logger.info("收到停止調校信號")
+        if self.is_tuning:
+            self.stop_event.set()
+            self.is_tuning = False
+            self.web_ui.set_status('stopped', '正在停止調校...'); 
+            logger.info("收到停止調校信號")
 
     def run_tuning_logic(self, target_model: str = None):
         try:
@@ -136,8 +142,19 @@ class WebIntegratedTuner:
                 if not self.is_tuning: self.web_ui.add_log_message('info', "調校已手動停止。"); break
                 model_name = model_data.get('model')
                 self.web_ui.set_status('running', f"正在調校模型 {i+1}/{len(models_to_run)}: {model_name}")
-                tuner = EnhancedOllamaTuner(model_name=model_name, constraints=self.select_constraints_by_size(model_data))
+                
+                tuner = EnhancedOllamaTuner(
+                    model_name=model_name, 
+                    constraints=self.select_constraints_by_size(model_data),
+                    stop_event=self.stop_event
+                )
+                
                 result = tuner.run()
+
+                if self.stop_event.is_set():
+                    self.web_ui.add_log_message('info', f"模型 '{model_name}' 的調校已中斷。")
+                    break
+
                 if result and result != "incompatible": self.all_results.append(result); self.web_ui.add_tuning_result(result)
                 elif result == "incompatible": self.web_ui.add_log_message('warning', f"模型 '{model_name}' 不支援生成功能")
                 else: self.web_ui.add_log_message('error', f"模型 '{model_name}' 調校失敗")

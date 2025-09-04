@@ -1,0 +1,23 @@
+{
+    "title": "Ollama Auto-Tuner Dashboard",
+    "status_heading": "Status",
+    "waiting": "Waiting for connection...",
+    "connect_success": "Connected to backend service",
+    "connect_disconnect": "Disconnected from backend service",
+    "start_tuning": "Start Tuning",
+    "stop_tuning": "Stop Tuning",
+    "generate_report": "Generate Report",
+    "all_models": "All Models",
+    "system_info": "System Info",
+    "system_memory": "System Memory:",
+    "gpu_memory": "GPU Memory:",
+    "cache": "Cache:",
+    "logs": "Logs",
+    "tuning_results": "Tuning Results (Live)",
+    "model": "Model",
+    "best_settings": "Best Settings",
+    "performance": "Performance (TPS)",
+    "quality_score": "Quality Score",
+    "no_gpu": "No GPU detected or no data",
+    "generate_full_report": "Generate Full Report"
+}
