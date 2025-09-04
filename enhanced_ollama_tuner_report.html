@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>增強的 Ollama Auto-Tuner 報告</title>
+    <title data-i18n="pageTitle">增強的 Ollama Auto-Tuner 報告</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -73,11 +73,14 @@
             font-size: 1.1em;
         }
 
-        .theme-switch {
+        .top-controls {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 1000;
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
 
         .theme-switch input[type="checkbox"] {
@@ -94,6 +97,15 @@
             align-items: center;
             gap: 8px;
             font-size: 14px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+        
+        .language-switch select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
             box-shadow: 0 2px 4px var(--shadow-color);
         }
 
@@ -274,86 +286,94 @@
     </style>
 </head>
 <body>
-    <div class="theme-switch">
-        <input type="checkbox" id="theme-toggle">
-        <label for="theme-toggle">
-            <span>🌙</span>
-            <span>淺色/深色</span>
-        </label>
+    <div class="top-controls">
+        <div class="language-switch">
+            <select id="language-selector" onchange="switchLanguage(this.value)">
+                <option value="zh-TW">繁體中文</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+        <div class="theme-switch">
+            <input type="checkbox" id="theme-toggle">
+            <label for="theme-toggle">
+                <span>🌙</span>
+                <span data-i18n="themeToggle">淺色/深色</span>
+            </label>
+        </div>
     </div>
 
     <div class="container">
         <div class="header">
-            <h1>🚀 增強的 Ollama Auto-Tuner 報告</h1>
-            <div class="subtitle">生成時間: 2025-09-04 18:44:57</div>
+            <h1 data-i18n="mainTitle">🚀 增強的 Ollama Auto-Tuner 報告</h1>
+            <div class="subtitle"><span data-i18n="generatedAt">生成時間</span>: 2025-09-04 23:39:50</div>
         </div>
 
         <!-- 系統統計 -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-value">1</div>
-                <div class="stat-label">測試模型數量</div>
+                <div class="stat-label" data-i18n="testedModels">測試模型數量</div>
             </div>
             
             <div class="stat-card">
-                <div class="stat-value">38.8%</div>
-                <div class="stat-label">系統記憶體使用率</div>
+                <div class="stat-value">52.3%</div>
+                <div class="stat-label" data-i18n="systemMemoryUsage">系統記憶體使用率</div>
             </div>
             
             
             <div class="stat-card">
-                <div class="stat-value">69</div>
-                <div class="stat-label">緩存檔案數量</div>
+                <div class="stat-value">15</div>
+                <div class="stat-label" data-i18n="cachedFiles">緩存檔案數量</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">0.05 MB</div>
-                <div class="stat-label">緩存總大小</div>
+                <div class="stat-value">0.01 MB</div>
+                <div class="stat-label" data-i18n="cacheTotalSize">緩存總大小</div>
             </div>
             
         </div>
 
         <!-- 性能對比圖表 -->
         <div class="chart-container">
-            <h3>📊 模型性能對比</h3>
+            <h3 data-i18n="performanceComparison">📊 模型性能對比</h3>
             <canvas id="performanceChart" width="400" height="200"></canvas>
         </div>
 
         <!-- 參數重要性圖表 -->
         <div class="chart-container">
-            <h3>🎯 參數重要性分析</h3>
+            <h3 data-i18n="parameterImportance">🎯 參數重要性分析</h3>
             <canvas id="importanceChart" width="400" height="200"></canvas>
         </div>
 
         <!-- 優化歷史圖表 -->
         <div class="chart-container">
-            <h3>📈 優化歷史趨勢</h3>
+            <h3 data-i18n="optimizationHistory">📈 優化歷史趨勢</h3>
             <canvas id="optimizationChart" width="400" height="200"></canvas>
         </div>
 
         <!-- 結果摘要表格 -->
         <div class="summary-grid">
             <div class="summary-card">
-                <h3>🏆 最佳性能模型</h3>
+                <h3 data-i18n="bestPerformingModel">🏆 最佳性能模型</h3>
                 
                 <p><strong>gemma3:4b</strong></p>
-                <p>TPS: 133.50</p>
-                <p>TTFT: 1959ms</p>
+                <p>TPS: 20.95</p>
+                <p>TTFT: 8422ms</p>
             </div>
 
             <div class="summary-card">
-                <h3>🎯 最佳品質模型</h3>
+                <h3 data-i18n="bestQualityModel">🎯 最佳品質模型</h3>
                 
                 <p><strong>gemma3:4b</strong></p>
-                <p>幻覺評分: 0.506</p>
-                <p>Temperature: 1.4377999578702347</p>
+                <p><span data-i18n="hallucinationScore">幻覺評分</span>: 0.504</p>
+                <p>Temperature: 1.0916356504193958</p>
             </div>
 
             <div class="summary-card">
-                <h3>⚡ 最快響應模型</h3>
+                <h3 data-i18n="fastestResponseModel">⚡ 最快響應模型</h3>
                 
                 <p><strong>gemma3:4b</strong></p>
-                <p>TTFT: 1959ms</p>
-                <p>總時間: 4.66s</p>
+                <p>TTFT: 8422ms</p>
+                <p><span data-i18n="totalDuration">總時間</span>: 22.65s</p>
             </div>
         </div>
 
@@ -361,11 +381,11 @@
         <table class="results-table">
             <thead>
                 <tr>
-                    <th>模型名稱</th>
-                    <th>最佳設定</th>
-                    <th>性能指標</th>
-                    <th>品質評分</th>
-                    <th>優化迭代</th>
+                    <th data-i18n="modelName">模型名稱</th>
+                    <th data-i18n="optimalSettings">最佳設定</th>
+                    <th data-i18n="performanceMetrics">性能指標</th>
+                    <th data-i18n="qualityScore">品質評分</th>
+                    <th data-i18n="optimizationIterations">優化迭代</th>
                 </tr>
             </thead>
             <tbody>
@@ -373,24 +393,24 @@
                 <tr>
                     <td><strong>gemma3:4b</strong></td>
                     <td>
-                        <div>Temperature: 1.4377999578702347</div>
-                        <div>Top_p: 0.8525830267877069</div>
-                        <div>Top_k: 94.26969304665239</div>
+                        <div>Temperature: 1.0916356504193958</div>
+                        <div>Top_p: 0.7847680165739477</div>
+                        <div>Top_k: 68.74570074665868</div>
                         <div>Num_ctx: 8192</div>
-                        <div>Num_gpu: 94</div>
+                        <div>Num_gpu: 0</div>
                     </td>
                     <td>
-                        <div>TTFT: 1959ms</div>
-                        <div>TPS: 133.50</div>
-                        <div>總時間: 4.66s</div>
+                        <div>TTFT: 8422ms</div>
+                        <div>TPS: 20.95</div>
+                        <div><span data-i18n="totalDuration">總時間</span>: 22.65s</div>
                     </td>
                     <td>
                         
                         
-                            <span class="badge badge-poor">0.506</span>
+                            <span class="badge badge-poor">0.504</span>
                         
                     </td>
-                    <td>10 次</td>
+                    <td>8 <span data-i18n="iterationsUnit">次</span></td>
                 </tr>
                 
             </tbody>
@@ -399,80 +419,70 @@
         <!-- 詳細模型分析 -->
         
         <div class="model-details">
-            <h3>🔍 gemma3:4b 詳細分析</h3>
+            <h3>🔍 gemma3:4b <span data-i18n="detailedAnalysis">詳細分析</span></h3>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div>
-                    <h4>參數重要性</h4>
+                    <h4 data-i18n="paramImportance">參數重要性</h4>
                     <div class="parameter-importance">
                         
                         <div class="parameter-item">
-                            temperature: 0.000
+                            temperature: 0.333
                         </div>
                         
                         <div class="parameter-item">
-                            top_p: 1.000
+                            top_p: 0.333
                         </div>
                         
                         <div class="parameter-item">
-                            top_k: 0.000
+                            top_k: 0.333
                         </div>
                         
                     </div>
                 </div>
                 
                 <div>
-                    <h4>優化歷史</h4>
+                    <h4 data-i18n="optHistory">優化歷史</h4>
                     <div class="optimization-history">
                         
                         <div class="history-item ">
-                            迭代 1: 0.4411
+                            <span data-i18n="iteration">迭代</span> 1: 0.4411
                             
                         </div>
                         
                         <div class="history-item ">
-                            迭代 2: 0.4394
+                            <span data-i18n="iteration">迭代</span> 2: 0.4369
                             
                         </div>
                         
                         <div class="history-item ">
-                            迭代 3: 0.4375
+                            <span data-i18n="iteration">迭代</span> 3: 0.4950
                             
                         </div>
                         
                         <div class="history-item ">
-                            迭代 4: 0.4394
+                            <span data-i18n="iteration">迭代</span> 4: 0.4944
                             
                         </div>
                         
                         <div class="history-item ">
-                            迭代 5: 0.4925
+                            <span data-i18n="iteration">迭代</span> 5: 0.4411
+                            
+                        </div>
+                        
+                        <div class="history-item ">
+                            <span data-i18n="iteration">迭代</span> 6: 0.4986
+                            
+                        </div>
+                        
+                        <div class="history-item ">
+                            <span data-i18n="iteration">迭代</span> 7: 0.4444
                             
                         </div>
                         
                         <div class="history-item best">
-                            迭代 6: 0.5064
-                            (最佳)
-                        </div>
-                        
-                        <div class="history-item ">
-                            迭代 7: 0.4969
-                            
-                        </div>
-                        
-                        <div class="history-item ">
-                            迭代 8: 0.4508
-                            
-                        </div>
-                        
-                        <div class="history-item ">
-                            迭代 9: 0.4469
-                            
-                        </div>
-                        
-                        <div class="history-item ">
-                            迭代 10: 0.4441
-                            
+                            <span data-i18n="iteration">迭代</span> 8: 0.5039
+                            <span data-i18n="bestTag">(最佳)</span>
                         </div>
                         
                     </div>
@@ -481,7 +491,7 @@
 
             
             <div style="margin-top: 20px;">
-                <h4>詳細評估指標</h4>
+                <h4 data-i18n="detailedEvaluationMetrics">詳細評估指標</h4>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
                     
                     
@@ -506,7 +516,7 @@
                     
                     
                     <div class="parameter-item">
-                        factual_accuracy: 0.311
+                        factual_accuracy: 0.361
                     </div>
                     
                     
@@ -524,13 +534,13 @@
                     
                     
                     <div class="parameter-item">
-                        completeness: 0.800
+                        completeness: 0.833
                     </div>
                     
                     
                     
                     <div class="parameter-item">
-                        fluency: 0.478
+                        fluency: 0.544
                     </div>
                     
                     
@@ -571,20 +581,19 @@
         toggleSwitch.addEventListener('change', switchTheme, false);
 
         // 性能對比圖表
-        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
-        new Chart(performanceCtx, {
+        window.performanceChart = new Chart(document.getElementById('performanceChart').getContext('2d'), {
             type: 'bar',
             data: {
                 labels: ['gemma3:4b'],
                 datasets: [{
                     label: 'TPS (tokens/s)',
-                    data: [133.50025546913346],
+                    data: [20.946300092372002],
                     backgroundColor: 'rgba(54, 162, 235, 0.8)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1
                 }, {
                     label: 'TTFT (ms)',
-                    data: [1959.005355834961],
+                    data: [8422.41358757019],
                     backgroundColor: 'rgba(255, 99, 132, 0.8)',
                     borderColor: 'rgba(255, 99, 132, 1)',
                     borderWidth: 1,
@@ -615,14 +624,12 @@
 
         // 參數重要性圖表
         
-        const importanceCtx = document.getElementById('importanceChart').getContext('2d');
-        const firstResult = {"temperature": 9.998000399920014e-05, "top_k": 9.998000399920014e-05, "top_p": 0.9998000399920015};
-        new Chart(importanceCtx, {
+        window.importanceChart = new Chart(document.getElementById('importanceChart').getContext('2d'), {
             type: 'doughnut',
             data: {
-                labels: Object.keys(firstResult),
+                labels: Object.keys({"temperature": 0.3333333333333333, "top_k": 0.3333333333333333, "top_p": 0.3333333333333333}),
                 datasets: [{
-                    data: Object.values(firstResult),
+                    data: Object.values({"temperature": 0.3333333333333333, "top_k": 0.3333333333333333, "top_p": 0.3333333333333333}),
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.8)',
                         'rgba(54, 162, 235, 0.8)',
@@ -645,9 +652,8 @@
 
         // 優化歷史圖表
         
-        const optimizationCtx = document.getElementById('optimizationChart').getContext('2d');
-        const history = [{"is_best": false, "iteration": 1, "parameters": {"temperature": 0.3590527761112904, "top_k": 8.284899378776643, "top_p": 0.6180693102428714}, "score": 0.4410912698412699}, {"is_best": false, "iteration": 2, "parameters": {"temperature": 0.9668294408567408, "top_k": 42.70126274966697, "top_p": 0.5322919451005192}, "score": 0.4394246031746032}, {"is_best": false, "iteration": 3, "parameters": {"temperature": 0.35951888894433737, "top_k": 8.678610837977304, "top_p": 0.7088587306602399}, "score": 0.4374801587301587}, {"is_best": false, "iteration": 4, "parameters": {"temperature": 0.420488860228335, "top_k": 113.05872303633089, "top_p": 0.6990544566596149}, "score": 0.4394246031746032}, {"is_best": false, "iteration": 5, "parameters": {"temperature": 1.4706970787522655, "top_k": 45.65794088865214, "top_p": 0.6398067144975632}, "score": 0.49248015873015877}, {"is_best": true, "iteration": 6, "parameters": {"temperature": 1.4377999578702347, "top_k": 94.26969304665239, "top_p": 0.8525830267877069}, "score": 0.5063690476190476}, {"is_best": false, "iteration": 7, "parameters": {"temperature": 0.4301231889787479, "top_k": 44.57535660442757, "top_p": 0.8648549622830483}, "score": 0.49692460317460313}, {"is_best": false, "iteration": 8, "parameters": {"temperature": 0.8842491357081097, "top_k": 101.31602619121945, "top_p": 0.6129313876950238}, "score": 0.4508134920634921}, {"is_best": false, "iteration": 9, "parameters": {"temperature": 1.4291938705954241, "top_k": 88.58237375665094, "top_p": 0.8416727644315267}, "score": 0.4469246031746032}, {"is_best": false, "iteration": 10, "parameters": {"temperature": 1.441724527409489, "top_k": 96.32429460468319, "top_p": 0.8424002357995333}, "score": 0.44414682539682543}];
-        new Chart(optimizationCtx, {
+        const history = [{"is_best": false, "iteration": 1, "parameters": {"temperature": 1.4781112191504056, "top_k": 103.60671670500341, "top_p": 0.6120614616046784}, "score": 0.4410912698412699}, {"is_best": false, "iteration": 2, "parameters": {"temperature": 0.7565761595640909, "top_k": 69.34651150748871, "top_p": 0.7597388687319261}, "score": 0.4369246031746032}, {"is_best": false, "iteration": 3, "parameters": {"temperature": 1.3357726049921073, "top_k": 110.82939898005058, "top_p": 0.9829073730995694}, "score": 0.4949801587301588}, {"is_best": false, "iteration": 4, "parameters": {"temperature": 1.436118499269723, "top_k": 12.653617970091938, "top_p": 0.8156220607430367}, "score": 0.4944246031746032}, {"is_best": false, "iteration": 5, "parameters": {"temperature": 0.24589677892743034, "top_k": 6.332070078498679, "top_p": 0.8525818260219942}, "score": 0.4410912698412699}, {"is_best": false, "iteration": 6, "parameters": {"temperature": 1.3582014302647651, "top_k": 84.57921869582849, "top_p": 0.5031409417508472}, "score": 0.49859126984126995}, {"is_best": false, "iteration": 7, "parameters": {"temperature": 1.0981085272724584, "top_k": 134.30601712104786, "top_p": 0.9029311062742911}, "score": 0.44442460317460314}, {"is_best": true, "iteration": 8, "parameters": {"temperature": 1.0916356504193958, "top_k": 68.74570074665868, "top_p": 0.7847680165739477}, "score": 0.5038690476190476}];
+        window.optimizationChart = new Chart(document.getElementById('optimizationChart').getContext('2d'), {
             type: 'line',
             data: {
                 labels: history.map(item => item.iteration),
@@ -684,184 +690,174 @@
     <!-- 名詞解說部分 -->
     <section class="glossary-section">
         <div class="container">
-            <h2 class="section-title">📚 名詞解說</h2>
+            <h2 class="section-title" data-i18n="glossaryTitle">📚 名詞解說</h2>
             <div class="glossary-grid">
                 
-                <!-- Temperature -->
                 <div class="glossary-item">
-                    <h3 class="glossary-term">Temperature</h3>
+                    <h3 class="glossary-term" data-i18n="glossaryTemperature">Temperature</h3>
                     <div class="glossary-content">
-                        <p><strong>定義：</strong>控制模型產生文字的隨機性。這是最常用於調整模型「創意度」的參數。</p>
+                        <p><strong data-i18n="glossaryDef">定義：</strong><span data-i18n="glossaryTemperatureDef">控制模型產生文字的隨機性。這是最常用於調整模型「創意度」的參數。</span></p>
                         <div class="glossary-details">
                             <div class="detail-item">
-                                <span class="detail-label">較高值 (如 1.0)：</span>
-                                <span class="detail-text">回應更具多樣性、創意和豐富性。適合用於腦力激盪、寫作等任務。缺點是可能偏離主題或產生不準確的內容。</span>
+                                <span class="detail-label" data-i18n="glossaryTemperatureHigh">較高值 (如 1.0)：</span>
+                                <span class="detail-text" data-i18n="glossaryTemperatureHighText">回應更具多樣性、創意和豐富性。適合用於腦力激盪、寫作等任務。缺點是可能偏離主題或產生不準確的內容。</span>
                             </div>
                             <div class="detail-item">
-                                <span class="detail-label">較低值 (如 0.3)：</span>
-                                <span class="detail-text">回應更具確定性、集中和可預測。適合用於事實問答、程式碼生成、內容摘要等需要高準確性的任務。缺點是可能顯得重複或呆板。</span>
+                                <span class="detail-label" data-i18n="glossaryTemperatureLow">較低值 (如 0.3)：</span>
+                                <span class="detail-text" data-i18n="glossaryTemperatureLowText">回應更具確定性、集中和可預測。適合用於事實問答、程式碼生成、內容摘要等需要高準確性的任務。缺點是可能顯得重複或呆板。</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Top-P -->
                 <div class="glossary-item">
-                    <h3 class="glossary-term">Top-P (Nucleus Sampling)</h3>
+                    <h3 class="glossary-term" data-i18n="glossaryTopP">Top-P (Nucleus Sampling)</h3>
                     <div class="glossary-content">
-                        <p><strong>定義：</strong>控制模型從累積機率達到指定閾值的詞彙中選擇下一個詞彙。</p>
+                        <p><strong data-i18n="glossaryDef">定義：</strong><span data-i18n="glossaryTopPDef">控制模型從累積機率達到指定閾值的詞彙中選擇下一個詞彙。</span></p>
                         <div class="glossary-details">
                             <div class="detail-item">
-                                <span class="detail-label">較高值 (如 0.9)：</span>
-                                <span class="detail-text">考慮更多可能的詞彙，增加回應的多樣性和創意性。適合需要豐富表達的任務。</span>
+                                <span class="detail-label" data-i18n="glossaryTopPHigh">較高值 (如 0.9)：</span>
+                                <span class="detail-text" data-i18n="glossaryTopPHighText">考慮更多可能的詞彙，增加回應的多樣性和創意性。適合需要豐富表達的任務。</span>
                             </div>
                             <div class="detail-item">
-                                <span class="detail-label">較低值 (如 0.3)：</span>
-                                <span class="detail-text">只考慮最可能的詞彙，提高回應的準確性和一致性。適合需要精確答案的任務。</span>
+                                <span class="detail-label" data-i18n="glossaryTopPLow">較低值 (如 0.3)：</span>
+                                <span class="detail-text" data-i18n="glossaryTopPLowText">只考慮最可能的詞彙，提高回應的準確性和一致性。適合需要精確答案的任務。</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Top-K -->
                 <div class="glossary-item">
-                    <h3 class="glossary-term">Top-K</h3>
+                    <h3 class="glossary-term" data-i18n="glossaryTopK">Top-K</h3>
                     <div class="glossary-content">
-                        <p><strong>定義：</strong>限制模型在選擇下一個詞彙時只考慮機率最高的前K個詞彙。</p>
+                        <p><strong data-i18n="glossaryDef">定義：</strong><span data-i18n="glossaryTopKDef">限制模型在選擇下一個詞彙時只考慮機率最高的前K個詞彙。</span></p>
                         <div class="glossary-details">
                             <div class="detail-item">
-                                <span class="detail-label">較高值 (如 100)：</span>
-                                <span class="detail-text">考慮更多詞彙選項，增加回應的多樣性。適合創意寫作和開放性問題。</span>
+                                <span class="detail-label" data-i18n="glossaryTopKHigh">較高值 (如 100)：</span>
+                                <span class="detail-text" data-i18n="glossaryTopKHighText">考慮更多詞彙選項，增加回應的多樣性。適合創意寫作和開放性問題。</span>
                             </div>
                             <div class="detail-item">
-                                <span class="detail-label">較低值 (如 10)：</span>
-                                <span class="detail-text">只考慮最可能的詞彙，提高回應的準確性和可預測性。適合事實性問答。</span>
+                                <span class="detail-label" data-i18n="glossaryTopKLow">較低值 (如 10)：</span>
+                                <span class="detail-text" data-i18n="glossaryTopKLowText">只考慮最可能的詞彙，提高回應的準確性和可預測性。適合事實性問答。</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Num_ctx -->
                 <div class="glossary-item">
-                    <h3 class="glossary-term">Num_ctx (Context Window)</h3>
+                    <h3 class="glossary-term" data-i18n="glossaryNumCtx">Num_ctx (Context Window)</h3>
                     <div class="glossary-content">
-                        <p><strong>定義：</strong>設定模型能夠處理的上下文窗口大小，即輸入和輸出文字的總長度限制。</p>
+                        <p><strong data-i18n="glossaryDef">定義：</strong><span data-i18n="glossaryNumCtxDef">設定模型能夠處理的上下文窗口大小，即輸入和輸出文字的總長度限制。</span></p>
                         <div class="glossary-details">
                             <div class="detail-item">
-                                <span class="detail-label">較大值 (如 8192)：</span>
-                                <span class="detail-text">能夠處理更長的對話和文檔，適合複雜任務和長文本分析。但會消耗更多記憶體。</span>
+                                <span class="detail-label" data-i18n="glossaryNumCtxHigh">較大值 (如 8192)：</span>
+                                <span class="detail-text" data-i18n="glossaryNumCtxHighText">能夠處理更長的對話和文檔，適合複雜任務和長文本分析。但會消耗更多記憶體。</span>
                             </div>
                             <div class="detail-item">
-                                <span class="detail-label">較小值 (如 1024)：</span>
-                                <span class="detail-text">節省記憶體和計算資源，適合簡單問答和短文本處理。但可能無法處理複雜的長文本。</span>
+                                <span class="detail-label" data-i18n="glossaryNumCtxLow">較小值 (如 1024)：</span>
+                                <span class="detail-text" data-i18n="glossaryNumCtxLowText">節省記憶體和計算資源，適合簡單問答和短文本處理。但可能無法處理複雜的長文本。</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Num_gpu -->
                 <div class="glossary-item">
-                    <h3 class="glossary-term">Num_gpu</h3>
+                    <h3 class="glossary-term" data-i18n="glossaryNumGpu">Num_gpu</h3>
                     <div class="glossary-content">
-                        <p><strong>定義：</strong>指定模型在GPU上運行的層數，影響計算速度和記憶體使用。</p>
+                        <p><strong data-i18n="glossaryDef">定義：</strong><span data-i18n="glossaryNumGpuDef">指定模型在GPU上運行的層數，影響計算速度和記憶體使用。</span></p>
                         <div class="glossary-details">
                             <div class="detail-item">
-                                <span class="detail-label">較高值 (如 50-100)：</span>
-                                <span class="detail-text">更多層在GPU上運行，提高生成速度。但需要更多GPU記憶體。</span>
+                                <span class="detail-label" data-i18n="glossaryNumGpuHigh">較高值 (如 50-100)：</span>
+                                <span class="detail-text" data-i18n="glossaryNumGpuHighText">更多層在GPU上運行，提高生成速度。但需要更多GPU記憶體。</span>
                             </div>
                             <div class="detail-item">
-                                <span class="detail-label">較低值 (如 0-20)：</span>
-                                <span class="detail-text">減少GPU記憶體使用，適合記憶體有限的環境。但可能降低生成速度。</span>
+                                <span class="detail-label" data-i18n="glossaryNumGpuLow">較低值 (如 0-20)：</span>
+                                <span class="detail-text" data-i18n="glossaryNumGpuLowText">減少GPU記憶體使用，適合記憶體有限的環境。但可能降低生成速度。</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- TTFT -->
                 <div class="glossary-item">
-                    <h3 class="glossary-term">TTFT (Time To First Token)</h3>
+                    <h3 class="glossary-term" data-i18n="glossaryTtft">TTFT (Time To First Token)</h3>
                     <div class="glossary-content">
-                        <p><strong>定義：</strong>從發送請求到收到第一個詞彙回應所需的時間。</p>
+                        <p><strong data-i18n="glossaryDef">定義：</strong><span data-i18n="glossaryTtftDef">從發送請求到收到第一個詞彙回應所需的時間。</span></p>
                         <div class="glossary-details">
                             <div class="detail-item">
-                                <span class="detail-label">較低值 (如 < 1秒)：</span>
-                                <span class="detail-text">回應速度快，用戶體驗良好。適合即時對話和互動應用。</span>
+                                <span class="detail-label" data-i18n="glossaryTtftLow">較低值 (如 < 1秒)：</span>
+                                <span class="detail-text" data-i18n="glossaryTtftLowText">回應速度快，用戶體驗良好。適合即時對話和互動應用。</span>
                             </div>
                             <div class="detail-item">
-                                <span class="detail-label">較高值 (如 > 5秒)：</span>
-                                <span class="detail-text">回應延遲較長，可能影響用戶體驗。通常與模型大小和硬體配置相關。</span>
+                                <span class="detail-label" data-i18n="glossaryTtftHigh">較高值 (如 > 5秒)：</span>
+                                <span class="detail-text" data-i18n="glossaryTtftHighText">回應延遲較長，可能影響用戶體驗。通常與模型大小和硬體配置相關。</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- TPS -->
                 <div class="glossary-item">
-                    <h3 class="glossary-term">TPS (Tokens Per Second)</h3>
+                    <h3 class="glossary-term" data-i18n="glossaryTps">TPS (Tokens Per Second)</h3>
                     <div class="glossary-content">
-                        <p><strong>定義：</strong>模型每秒生成的詞彙數量，衡量生成速度的指標。</p>
+                        <p><strong data-i18n="glossaryDef">定義：</strong><span data-i18n="glossaryTpsDef">模型每秒生成的詞彙數量，衡量生成速度的指標。</span></p>
                         <div class="glossary-details">
                             <div class="detail-item">
-                                <span class="detail-label">較高值 (如 > 50)：</span>
-                                <span class="detail-text">生成速度快，適合需要快速產生大量文字的應用。</span>
+                                <span class="detail-label" data-i18n="glossaryTpsHigh">較高值 (如 > 50)：</span>
+                                <span class="detail-text" data-i18n="glossaryTpsHighText">生成速度快，適合需要快速產生大量文字的應用。</span>
                             </div>
                             <div class="detail-item">
-                                <span class="detail-label">較低值 (如 < 10)：</span>
-                                <span class="detail-text">生成速度較慢，可能影響長文本生成的效率。</span>
+                                <span class="detail-label" data-i18n="glossaryTpsLow">較低值 (如 < 10)：</span>
+                                <span class="detail-text" data-i18n="glossaryTpsLowText">生成速度較慢，可能影響長文本生成的效率。</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Hallucination Score -->
                 <div class="glossary-item">
-                    <h3 class="glossary-term">Hallucination Score</h3>
+                    <h3 class="glossary-term" data-i18n="glossaryHallucinationScoreTitle">Hallucination Score</h3>
                     <div class="glossary-content">
-                        <p><strong>定義：</strong>評估模型產生虛假或不準確資訊的程度，分數越高表示越準確。</p>
+                        <p><strong data-i18n="glossaryDef">定義：</strong><span data-i18n="glossaryHallucinationScoreDef">評估模型產生虛假或不準確資訊的程度，分數越高表示越準確。</span></p>
                         <div class="glossary-details">
                             <div class="detail-item">
-                                <span class="detail-label">較高值 (如 > 0.8)：</span>
-                                <span class="detail-text">模型回應準確性高，很少產生虛假資訊。適合需要高可信度的應用。</span>
+                                <span class="detail-label" data-i18n="glossaryHallucinationScoreHigh">較高值 (如 > 0.8)：</span>
+                                <span class="detail-text" data-i18n="glossaryHallucinationScoreHighText">模型回應準確性高，很少產生虛假資訊。適合需要高可信度的應用。</span>
                             </div>
                             <div class="detail-item">
-                                <span class="detail-label">較低值 (如 < 0.5)：</span>
-                                <span class="detail-text">模型可能產生較多不準確的資訊，需要額外驗證。</span>
+                                <span class="detail-label" data-i18n="glossaryHallucinationScoreLow">較低值 (如 < 0.5)：</span>
+                                <span class="detail-text" data-i18n="glossaryHallucinationScoreLowText">模型可能產生較多不準確的資訊，需要額外驗證。</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Bayesian Optimization -->
                 <div class="glossary-item">
-                    <h3 class="glossary-term">貝葉斯優化 (Bayesian Optimization)</h3>
+                    <h3 class="glossary-term" data-i18n="glossaryBayesianOptimization">貝葉斯優化 (Bayesian Optimization)</h3>
                     <div class="glossary-content">
-                        <p><strong>定義：</strong>一種智能的參數調優算法，使用高斯過程來建模目標函數，並通過採集函數選擇下一個測試點。</p>
+                        <p><strong data-i18n="glossaryDef">定義：</strong><span data-i18n="glossaryBayesianOptimizationDef">一種智能的參數調優算法，使用高斯過程來建模目標函數，並通過採集函數選擇下一個測試點。</span></p>
                         <div class="glossary-details">
                             <div class="detail-item">
-                                <span class="detail-label">優勢：</span>
-                                <span class="detail-text">比網格搜尋更有效率，能夠在較少測試次數內找到較好的參數組合。</span>
+                                <span class="detail-label" data-i18n="glossaryBayesianOptimizationAdv">優勢：</span>
+                                <span class="detail-text" data-i18n="glossaryBayesianOptimizationAdvText">比網格搜尋更有效率，能夠在較少測試次數內找到較好的參數組合。</span>
                             </div>
                             <div class="detail-item">
-                                <span class="detail-label">適用場景：</span>
-                                <span class="detail-text">參數空間較大、評估成本較高的優化問題。</span>
+                                <span class="detail-label" data-i18n="glossaryBayesianOptimizationScene">適用場景：</span>
+                                <span class="detail-text" data-i18n="glossaryBayesianOptimizationSceneText">參數空間較大、評估成本較高的優化問題。</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Early Stopping -->
                 <div class="glossary-item">
-                    <h3 class="glossary-term">早期停止 (Early Stopping)</h3>
+                    <h3 class="glossary-term" data-i18n="glossaryEarlyStopping">早期停止 (Early Stopping)</h3>
                     <div class="glossary-content">
-                        <p><strong>定義：</strong>當優化過程無法取得顯著改善時，提前結束測試的機制。</p>
+                        <p><strong data-i18n="glossaryDef">定義：</strong><span data-i18n="glossaryEarlyStoppingDef">當優化過程無法取得顯著改善時，提前結束測試的機制。</span></p>
                         <div class="glossary-details">
                             <div class="detail-item">
-                                <span class="detail-label">目的：</span>
-                                <span class="detail-text">節省計算資源和時間，避免無效的測試。</span>
+                                <span class="detail-label" data-i18n="glossaryEarlyStoppingPurpose">目的：</span>
+                                <span class="detail-text" data-i18n="glossaryEarlyStoppingPurposeText">節省計算資源和時間，避免無效的測試。</span>
                             </div>
                             <div class="detail-item">
-                                <span class="detail-label">觸發條件：</span>
-                                <span class="detail-text">連續多次迭代沒有顯著改善，或已達到預設的停止條件。</span>
+                                <span class="detail-label" data-i18n="glossaryEarlyStoppingTrigger">觸發條件：</span>
+                                <span class="detail-text" data-i18n="glossaryEarlyStoppingTriggerText">連續多次迭代沒有顯著改善，或已達到預設的停止條件。</span>
                             </div>
                         </div>
                     </div>
@@ -955,5 +951,255 @@
             }
         }
     </style>
+    
+    <script>
+        const translations = {
+            en: {
+                pageTitle: "Enhanced Ollama Auto-Tuner Report",
+                themeToggle: "Light/Dark",
+                mainTitle: "🚀 Enhanced Ollama Auto-Tuner Report",
+                generatedAt: "Generated at",
+                testedModels: "Models Tested",
+                systemMemoryUsage: "System Memory Usage",
+                cachedFiles: "Cached Files",
+                cacheTotalSize: "Cache Total Size",
+                performanceComparison: "📊 Model Performance Comparison",
+                parameterImportance: "🎯 Parameter Importance Analysis",
+                optimizationHistory: "📈 Optimization History Trend",
+                bestPerformingModel: "🏆 Best Performance Model",
+                bestQualityModel: "🎯 Best Quality Model",
+                fastestResponseModel: "⚡ Fastest Response Model",
+                hallucinationScore: "Hallucination Score",
+                totalDuration: "Total Duration",
+                modelName: "Model Name",
+                optimalSettings: "Optimal Settings",
+                performanceMetrics: "Performance Metrics",
+                qualityScore: "Quality Score",
+                optimizationIterations: "Optimization Iterations",
+                iterationsUnit: "iterations",
+                detailedAnalysis: "Detailed Analysis",
+                paramImportance: "Parameter Importance",
+                optHistory: "Optimization History",
+                iteration: "Iteration",
+                bestTag: "(Best)",
+                detailedEvaluationMetrics: "Detailed Evaluation Metrics",
+                glossaryTitle: "📚 Glossary",
+                glossaryDef: "Definition:",
+                chartTpsLabel: "TPS (tokens/s)",
+                chartTtftLabel: "TTFT (ms)",
+                chartTpsAxis: "TPS",
+                chartTtftAxis: "TTFT (ms)",
+                chartOptimizationScore: "Optimization Score",
+                chartScoreAxis: "Score",
+                chartIterationAxis: "Iteration",
+                glossaryTemperature: "Temperature",
+                glossaryTemperatureDef: "Controls the randomness of the model's output. This is the most common parameter for adjusting the model's 'creativity'.",
+                glossaryTemperatureHigh: "Higher value (e.g., 1.0):",
+                glossaryTemperatureHighText: "Responses are more diverse, creative, and rich. Suitable for brainstorming, writing, etc. The downside is it may deviate from the topic or produce inaccurate content.",
+                glossaryTemperatureLow: "Lower value (e.g., 0.3):",
+                glossaryTemperatureLowText: "Responses are more deterministic, focused, and predictable. Suitable for factual Q&A, code generation, content summarization, etc., where high accuracy is required. The downside is it may seem repetitive or dull.",
+                glossaryTopP: "Top-P (Nucleus Sampling)",
+                glossaryTopPDef: "Controls the model to select the next token from a vocabulary whose cumulative probability reaches a specified threshold.",
+                glossaryTopPHigh: "Higher value (e.g., 0.9):",
+                glossaryTopPHighText: "Considers more possible words, increasing the diversity and creativity of the response. Suitable for tasks requiring rich expression.",
+                glossaryTopPLow: "Lower value (e.g., 0.3):",
+                glossaryTopPLowText: "Considers only the most likely words, improving the accuracy and consistency of the response. Suitable for tasks requiring precise answers.",
+                glossaryTopK: "Top-K",
+                glossaryTopKDef: "Restricts the model to consider only the top K most probable words when selecting the next token.",
+                glossaryTopKHigh: "Higher value (e.g., 100):",
+                glossaryTopKHighText: "Considers more word options, increasing the diversity of the response. Suitable for creative writing and open-ended questions.",
+                glossaryTopKLow: "Lower value (e.g., 10):",
+                glossaryTopKLowText: "Considers only the most likely words, improving the accuracy and predictability of the response. Suitable for factual Q&A.",
+                glossaryNumCtx: "Num_ctx (Context Window)",
+                glossaryNumCtxDef: "Sets the context window size the model can handle, i.e., the total length limit for input and output text.",
+                glossaryNumCtxHigh: "Larger value (e.g., 8192):",
+                glossaryNumCtxHighText: "Can handle longer conversations and documents, suitable for complex tasks and long-text analysis. But it consumes more memory.",
+                glossaryNumCtxLow: "Smaller value (e.g., 1024):",
+                glossaryNumCtxLowText: "Saves memory and computing resources, suitable for simple Q&A and short-text processing. But it may not handle complex long texts.",
+                glossaryNumGpu: "Num_gpu",
+                glossaryNumGpuDef: "Specifies the number of layers to run on the GPU, affecting computation speed and memory usage.",
+                glossaryNumGpuHigh: "Higher value (e.g., 50-100):",
+                glossaryNumGpuHighText: "More layers run on the GPU, increasing generation speed. But it requires more GPU memory.",
+                glossaryNumGpuLow: "Lower value (e.g., 0-20):",
+                glossaryNumGpuLowText: "Reduces GPU memory usage, suitable for environments with limited memory. But it may decrease generation speed.",
+                glossaryTtft: "TTFT (Time To First Token)",
+                glossaryTtftDef: "The time from sending a request to receiving the first token of the response.",
+                glossaryTtftLow: "Lower value (e.g., < 1s):",
+                glossaryTtftLowText: "Fast response speed, good user experience. Suitable for real-time chat and interactive applications.",
+                glossaryTtftHigh: "Higher value (e.g., > 5s):",
+                glossaryTtftHighText: "Longer response delay, may affect user experience. Usually related to model size and hardware configuration.",
+                glossaryTps: "TPS (Tokens Per Second)",
+                glossaryTpsDef: "The number of tokens the model generates per second, a metric for generation speed.",
+                glossaryTpsHigh: "Higher value (e.g., > 50):",
+                glossaryTpsHighText: "Fast generation speed, suitable for applications that need to generate a large amount of text quickly.",
+                glossaryTpsLow: "Lower value (e.g., < 10):",
+                glossaryTpsLowText: "Slower generation speed, may affect the efficiency of long-text generation.",
+                glossaryHallucinationScoreTitle: "Hallucination Score",
+                glossaryHallucinationScoreDef: "Evaluates the degree to which the model produces false or inaccurate information. A higher score indicates higher accuracy.",
+                glossaryHallucinationScoreHigh: "Higher value (e.g., > 0.8):",
+                glossaryHallucinationScoreHighText: "The model's responses are highly accurate and rarely produce false information. Suitable for applications requiring high reliability.",
+                glossaryHallucinationScoreLow: "Lower value (e.g., < 0.5):",
+                glossaryHallucinationScoreLowText: "The model may produce more inaccurate information, requiring additional verification.",
+                glossaryBayesianOptimization: "Bayesian Optimization",
+                glossaryBayesianOptimizationDef: "An intelligent parameter tuning algorithm that uses Gaussian processes to model the objective function and selects the next test point through an acquisition function.",
+                glossaryBayesianOptimizationAdv: "Advantage:",
+                glossaryBayesianOptimizationAdvText: "More efficient than grid search, able to find better parameter combinations with fewer test iterations.",
+                glossaryBayesianOptimizationScene: "Applicable Scenarios:",
+                glossaryBayesianOptimizationSceneText: "Optimization problems with a large parameter space and high evaluation costs.",
+                glossaryEarlyStopping: "Early Stopping",
+                glossaryEarlyStoppingDef: "A mechanism to end the test early when the optimization process fails to achieve significant improvement.",
+                glossaryEarlyStoppingPurpose: "Purpose:",
+                glossaryEarlyStoppingPurposeText: "Save computing resources and time, avoiding ineffective tests.",
+                glossaryEarlyStoppingTrigger: "Trigger Condition:",
+                glossaryEarlyStoppingTriggerText: "No significant improvement for several consecutive iterations, or a preset stopping condition is met."
+            },
+            'zh-TW': {
+                pageTitle: "增強的 Ollama Auto-Tuner 報告",
+                themeToggle: "淺色/深色",
+                mainTitle: "🚀 增強的 Ollama Auto-Tuner 報告",
+                generatedAt: "生成時間",
+                testedModels: "測試模型數量",
+                systemMemoryUsage: "系統記憶體使用率",
+                cachedFiles: "緩存檔案數量",
+                cacheTotalSize: "緩存總大小",
+                performanceComparison: "📊 模型性能對比",
+                parameterImportance: "🎯 參數重要性分析",
+                optimizationHistory: "📈 優化歷史趨勢",
+                bestPerformingModel: "🏆 最佳性能模型",
+                bestQualityModel: "🎯 最佳品質模型",
+                fastestResponseModel: "⚡ 最快響應模型",
+                hallucinationScore: "幻覺評分",
+                totalDuration: "總時間",
+                modelName: "模型名稱",
+                optimalSettings: "最佳設定",
+                performanceMetrics: "性能指標",
+                qualityScore: "品質評分",
+                optimizationIterations: "優化迭代",
+                iterationsUnit: "次",
+                detailedAnalysis: "詳細分析",
+                paramImportance: "參數重要性",
+                optHistory: "優化歷史",
+                iteration: "迭代",
+                bestTag: "(最佳)",
+                detailedEvaluationMetrics: "詳細評估指標",
+                glossaryTitle: "📚 名詞解說",
+                glossaryDef: "定義：",
+                chartTpsLabel: "TPS (tokens/s)",
+                chartTtftLabel: "TTFT (ms)",
+                chartTpsAxis: "TPS",
+                chartTtftAxis: "TTFT (ms)",
+                chartOptimizationScore: "優化評分",
+                chartScoreAxis: "評分",
+                chartIterationAxis: "迭代次數",
+                glossaryTemperature: "Temperature",
+                glossaryTemperatureDef: "控制模型產生文字的隨機性。這是最常用於調整模型「創意度」的參數。",
+                glossaryTemperatureHigh: "較高值 (如 1.0)：",
+                glossaryTemperatureHighText: "回應更具多樣性、創意和豐富性。適合用於腦力激盪、寫作等任務。缺點是可能偏離主題或產生不準確的內容。",
+                glossaryTemperatureLow: "較低值 (如 0.3)：",
+                glossaryTemperatureLowText: "回應更具確定性、集中和可預測。適合用於事實問答、程式碼生成、內容摘要等需要高準確性的任務。缺點是可能顯得重複或呆板。",
+                glossaryTopP: "Top-P (Nucleus Sampling)",
+                glossaryTopPDef: "控制模型從累積機率達到指定閾值的詞彙中選擇下一個詞彙。",
+                glossaryTopPHigh: "較高值 (如 0.9)：",
+                glossaryTopPHighText: "考慮更多可能的詞彙，增加回應的多樣性和創意性。適合需要豐富表達的任務。",
+                glossaryTopPLow: "較低值 (如 0.3)：",
+                glossaryTopPLowText: "只考慮最可能的詞彙，提高回應的準確性和一致性。適合需要精確答案的任務。",
+                glossaryTopK: "Top-K",
+                glossaryTopKDef: "限制模型在選擇下一個詞彙時只考慮機率最高的前K個詞彙。",
+                glossaryTopKHigh: "較高值 (如 100)：",
+                glossaryTopKHighText: "考慮更多詞彙選項，增加回應的多樣性。適合創意寫作和開放性問題。",
+                glossaryTopKLow: "較低值 (如 10)：",
+                glossaryTopKLowText: "只考慮最可能的詞彙，提高回應的準確性和可預測性。適合事實性問答。",
+                glossaryNumCtx: "Num_ctx (Context Window)",
+                glossaryNumCtxDef: "設定模型能夠處理的上下文窗口大小，即輸入和輸出文字的總長度限制。",
+                glossaryNumCtxHigh: "較大值 (如 8192)：",
+                glossaryNumCtxHighText: "能夠處理更長的對話和文檔，適合複雜任務和長文本分析。但會消耗更多記憶體。",
+                glossaryNumCtxLow: "較小值 (如 1024)：",
+                glossaryNumCtxLowText: "節省記憶體和計算資源，適合簡單問答和短文本處理。但可能無法處理複雜的長文本。",
+                glossaryNumGpu: "Num_gpu",
+                glossaryNumGpuDef: "指定模型在GPU上運行的層數，影響計算速度和記憶體使用。",
+                glossaryNumGpuHigh: "較高值 (如 50-100)：",
+                glossaryNumGpuHighText: "更多層在GPU上運行，提高生成速度。但需要更多GPU記憶體。",
+                glossaryNumGpuLow: "較低值 (如 0-20)：",
+                glossaryNumGpuLowText: "減少GPU記憶體使用，適合記憶體有限的環境。但可能降低生成速度。",
+                glossaryTtft: "TTFT (Time To First Token)",
+                glossaryTtftDef: "從發送請求到收到第一個詞彙回應所需的時間。",
+                glossaryTtftLow: "較低值 (如 < 1秒)：",
+                glossaryTtftLowText: "回應速度快，用戶體驗良好。適合即時對話和互動應用。",
+                glossaryTtftHigh: "較高值 (如 > 5秒)：",
+                glossaryTtftHighText: "回應延遲較長，可能影響用戶體驗。通常與模型大小和硬體配置相關。",
+                glossaryTps: "TPS (Tokens Per Second)",
+                glossaryTpsDef: "模型每秒生成的詞彙數量，衡量生成速度的指標。",
+                glossaryTpsHigh: "較高值 (如 > 50)：",
+                glossaryTpsHighText: "生成速度快，適合需要快速產生大量文字的應用。",
+                glossaryTpsLow: "較低值 (如 < 10)：",
+                glossaryTpsLowText: "生成速度較慢，可能影響長文本生成的效率。",
+                glossaryHallucinationScoreTitle: "Hallucination Score",
+                glossaryHallucinationScoreDef: "評估模型產生虛假或不準確資訊的程度，分數越高表示越準確。",
+                glossaryHallucinationScoreHigh: "較高值 (如 > 0.8)：",
+                glossaryHallucinationScoreHighText: "模型回應準確性高，很少產生虛假資訊。適合需要高可信度的應用。",
+                glossaryHallucinationScoreLow: "較低值 (如 < 0.5)：",
+                glossaryHallucinationScoreLowText: "模型可能產生較多不準確的資訊，需要額外驗證。",
+                glossaryBayesianOptimization: "貝葉斯優化 (Bayesian Optimization)",
+                glossaryBayesianOptimizationDef: "一種智能的參數調優算法，使用高斯過程來建模目標函數，並通過採集函數選擇下一個測試點。",
+                glossaryBayesianOptimizationAdv: "優勢：",
+                glossaryBayesianOptimizationAdvText: "比網格搜尋更有效率，能夠在較少測試次數內找到較好的參數組合。",
+                glossaryBayesianOptimizationScene: "適用場景：",
+                glossaryBayesianOptimizationSceneText: "參數空間較大、評估成本較高的優化問題。",
+                glossaryEarlyStopping: "早期停止 (Early Stopping)",
+                glossaryEarlyStoppingDef: "當優化過程無法取得顯著改善時，提前結束測試的機制。",
+                glossaryEarlyStoppingPurpose: "目的：",
+                glossaryEarlyStoppingPurposeText: "節省計算資源和時間，避免無效的測試。",
+                glossaryEarlyStoppingTrigger: "觸發條件：",
+                glossaryEarlyStoppingTriggerText: "連續多次迭代沒有顯著改善，或已達到預設的停止條件。"
+            }
+        };
+
+        function switchLanguage(lang) {
+            document.documentElement.lang = lang;
+            localStorage.setItem('language', lang);
+            document.getElementById('language-selector').value = lang;
+
+            const translatableElements = document.querySelectorAll('[data-i18n]');
+            translatableElements.forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+            
+            updateChartLabels(lang);
+        }
+
+        function updateChartLabels(lang) {
+            const langDict = translations[lang];
+            if (window.performanceChart) {
+                window.performanceChart.data.datasets[0].label = langDict.chartTpsLabel;
+                window.performanceChart.data.datasets[1].label = langDict.chartTtftLabel;
+                window.performanceChart.options.scales.y.title.text = langDict.chartTpsAxis;
+                window.performanceChart.options.scales.y1.title.text = langDict.chartTtftAxis;
+                window.performanceChart.update();
+            }
+            if (window.optimizationChart) {
+                window.optimizationChart.data.datasets[0].label = langDict.chartOptimizationScore;
+                window.optimizationChart.options.scales.y.title.text = langDict.chartScoreAxis;
+                window.optimizationChart.options.scales.x.title.text = langDict.chartIterationAxis;
+                window.optimizationChart.update();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('language');
+            const browserLang = navigator.language || navigator.userLanguage;
+            
+            let initialLang = 'zh-TW';
+            if (savedLang) {
+                initialLang = savedLang;
+            } else if (browserLang.startsWith('en')) {
+                initialLang = 'en';
+            }
+            
+            switchLanguage(initialLang);
+        });
+    </script>
 </body>
 </html>
