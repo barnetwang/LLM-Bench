@@ -305,7 +305,7 @@
     <div class="container">
         <div class="header">
             <h1 data-i18n="mainTitle">🚀 增強的 Ollama Auto-Tuner 報告</h1>
-            <div class="subtitle"><span data-i18n="generatedAt">生成時間</span>: 2025-09-04 23:39:50</div>
+            <div class="subtitle"><span data-i18n="generatedAt">生成時間</span>: 2025-09-05 11:40:57</div>
         </div>
 
         <!-- 系統統計 -->
@@ -316,13 +316,13 @@
             </div>
             
             <div class="stat-card">
-                <div class="stat-value">52.3%</div>
+                <div class="stat-value">34.2%</div>
                 <div class="stat-label" data-i18n="systemMemoryUsage">系統記憶體使用率</div>
             </div>
             
             
             <div class="stat-card">
-                <div class="stat-value">15</div>
+                <div class="stat-value">20</div>
                 <div class="stat-label" data-i18n="cachedFiles">緩存檔案數量</div>
             </div>
             <div class="stat-card">
@@ -355,25 +355,25 @@
             <div class="summary-card">
                 <h3 data-i18n="bestPerformingModel">🏆 最佳性能模型</h3>
                 
-                <p><strong>gemma3:4b</strong></p>
-                <p>TPS: 20.95</p>
-                <p>TTFT: 8422ms</p>
+                <p><strong>qwen3:30b-a3b</strong></p>
+                <p>TPS: 114.01</p>
+                <p>TTFT: 69ms</p>
             </div>
 
             <div class="summary-card">
                 <h3 data-i18n="bestQualityModel">🎯 最佳品質模型</h3>
                 
-                <p><strong>gemma3:4b</strong></p>
-                <p><span data-i18n="hallucinationScore">幻覺評分</span>: 0.504</p>
-                <p>Temperature: 1.0916356504193958</p>
+                <p><strong>qwen3:30b-a3b</strong></p>
+                <p><span data-i18n="hallucinationScore">幻覺評分</span>: 0.558</p>
+                <p>Temperature: 1.0857121772919542</p>
             </div>
 
             <div class="summary-card">
                 <h3 data-i18n="fastestResponseModel">⚡ 最快響應模型</h3>
                 
-                <p><strong>gemma3:4b</strong></p>
-                <p>TTFT: 8422ms</p>
-                <p><span data-i18n="totalDuration">總時間</span>: 22.65s</p>
+                <p><strong>qwen3:30b-a3b</strong></p>
+                <p>TTFT: 69ms</p>
+                <p><span data-i18n="totalDuration">總時間</span>: 14.10s</p>
             </div>
         </div>
 
@@ -391,26 +391,26 @@
             <tbody>
                 
                 <tr>
-                    <td><strong>gemma3:4b</strong></td>
+                    <td><strong>qwen3:30b-a3b</strong></td>
                     <td>
-                        <div>Temperature: 1.0916356504193958</div>
-                        <div>Top_p: 0.7847680165739477</div>
-                        <div>Top_k: 68.74570074665868</div>
+                        <div>Temperature: 1.0857121772919542</div>
+                        <div>Top_p: 0.585732901998774</div>
+                        <div>Top_k: 99.20452349194485</div>
                         <div>Num_ctx: 8192</div>
-                        <div>Num_gpu: 0</div>
+                        <div>Num_gpu: 100</div>
                     </td>
                     <td>
-                        <div>TTFT: 8422ms</div>
-                        <div>TPS: 20.95</div>
-                        <div><span data-i18n="totalDuration">總時間</span>: 22.65s</div>
+                        <div>TTFT: 69ms</div>
+                        <div>TPS: 114.01</div>
+                        <div><span data-i18n="totalDuration">總時間</span>: 14.10s</div>
                     </td>
                     <td>
                         
                         
-                            <span class="badge badge-poor">0.504</span>
+                            <span class="badge badge-poor">0.558</span>
                         
                     </td>
-                    <td>8 <span data-i18n="iterationsUnit">次</span></td>
+                    <td>11 <span data-i18n="iterationsUnit">次</span></td>
                 </tr>
                 
             </tbody>
@@ -419,7 +419,7 @@
         <!-- 詳細模型分析 -->
         
         <div class="model-details">
-            <h3>🔍 gemma3:4b <span data-i18n="detailedAnalysis">詳細分析</span></h3>
+            <h3>🔍 qwen3:30b-a3b <span data-i18n="detailedAnalysis">詳細分析</span></h3>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div>
@@ -446,42 +446,52 @@
                     <div class="optimization-history">
                         
                         <div class="history-item ">
-                            <span data-i18n="iteration">迭代</span> 1: 0.4411
+                            <span data-i18n="iteration">迭代</span> 2: 0.5174
                             
                         </div>
                         
                         <div class="history-item ">
-                            <span data-i18n="iteration">迭代</span> 2: 0.4369
+                            <span data-i18n="iteration">迭代</span> 3: 0.5162
                             
                         </div>
                         
                         <div class="history-item ">
-                            <span data-i18n="iteration">迭代</span> 3: 0.4950
+                            <span data-i18n="iteration">迭代</span> 4: 0.5211
                             
                         </div>
                         
                         <div class="history-item ">
-                            <span data-i18n="iteration">迭代</span> 4: 0.4944
+                            <span data-i18n="iteration">迭代</span> 5: 0.5163
                             
                         </div>
                         
                         <div class="history-item ">
-                            <span data-i18n="iteration">迭代</span> 5: 0.4411
+                            <span data-i18n="iteration">迭代</span> 6: 0.5563
                             
                         </div>
                         
                         <div class="history-item ">
-                            <span data-i18n="iteration">迭代</span> 6: 0.4986
+                            <span data-i18n="iteration">迭代</span> 7: 0.5159
                             
                         </div>
                         
                         <div class="history-item ">
-                            <span data-i18n="iteration">迭代</span> 7: 0.4444
+                            <span data-i18n="iteration">迭代</span> 8: 0.5142
+                            
+                        </div>
+                        
+                        <div class="history-item ">
+                            <span data-i18n="iteration">迭代</span> 9: 0.5058
+                            
+                        </div>
+                        
+                        <div class="history-item ">
+                            <span data-i18n="iteration">迭代</span> 10: 0.5219
                             
                         </div>
                         
                         <div class="history-item best">
-                            <span data-i18n="iteration">迭代</span> 8: 0.5039
+                            <span data-i18n="iteration">迭代</span> 11: 0.5580
                             <span data-i18n="bestTag">(最佳)</span>
                         </div>
                         
@@ -498,25 +508,13 @@
                     
                     
                     <div class="parameter-item">
-                        hallucination: 0.333
+                        hallucination: 1.000
                     </div>
                     
                     
                     
                     <div class="parameter-item">
-                        relevance: 0.000
-                    </div>
-                    
-                    
-                    
-                    <div class="parameter-item">
-                        logical_consistency: 0.850
-                    </div>
-                    
-                    
-                    
-                    <div class="parameter-item">
-                        factual_accuracy: 0.361
+                        fluency: 0.766
                     </div>
                     
                     
@@ -528,19 +526,49 @@
                     
                     
                     <div class="parameter-item">
-                        multilingual_support: 0.938
+                        pass@1: 0.000
                     </div>
                     
                     
                     
                     <div class="parameter-item">
-                        completeness: 0.833
+                        factual_accuracy: 0.839
                     </div>
                     
                     
                     
                     <div class="parameter-item">
-                        fluency: 0.544
+                        completeness: 0.900
+                    </div>
+                    
+                    
+                    
+                    <div class="parameter-item">
+                        bleu: 0.000
+                    </div>
+                    
+                    
+                    
+                    <div class="parameter-item">
+                        rougeL: 0.000
+                    </div>
+                    
+                    
+                    
+                    <div class="parameter-item">
+                        logical_consistency: 0.583
+                    </div>
+                    
+                    
+                    
+                    <div class="parameter-item">
+                        relevance: 0.000
+                    </div>
+                    
+                    
+                    
+                    <div class="parameter-item">
+                        multilingual_support: 0.982
                     </div>
                     
                     
@@ -584,16 +612,16 @@
         window.performanceChart = new Chart(document.getElementById('performanceChart').getContext('2d'), {
             type: 'bar',
             data: {
-                labels: ['gemma3:4b'],
+                labels: ['qwen3:30b-a3b'],
                 datasets: [{
                     label: 'TPS (tokens/s)',
-                    data: [20.946300092372002],
+                    data: [114.01416293601343],
                     backgroundColor: 'rgba(54, 162, 235, 0.8)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1
                 }, {
                     label: 'TTFT (ms)',
-                    data: [8422.41358757019],
+                    data: [69.05913352966309],
                     backgroundColor: 'rgba(255, 99, 132, 0.8)',
                     borderColor: 'rgba(255, 99, 132, 1)',
                     borderWidth: 1,
@@ -652,7 +680,7 @@
 
         // 優化歷史圖表
         
-        const history = [{"is_best": false, "iteration": 1, "parameters": {"temperature": 1.4781112191504056, "top_k": 103.60671670500341, "top_p": 0.6120614616046784}, "score": 0.4410912698412699}, {"is_best": false, "iteration": 2, "parameters": {"temperature": 0.7565761595640909, "top_k": 69.34651150748871, "top_p": 0.7597388687319261}, "score": 0.4369246031746032}, {"is_best": false, "iteration": 3, "parameters": {"temperature": 1.3357726049921073, "top_k": 110.82939898005058, "top_p": 0.9829073730995694}, "score": 0.4949801587301588}, {"is_best": false, "iteration": 4, "parameters": {"temperature": 1.436118499269723, "top_k": 12.653617970091938, "top_p": 0.8156220607430367}, "score": 0.4944246031746032}, {"is_best": false, "iteration": 5, "parameters": {"temperature": 0.24589677892743034, "top_k": 6.332070078498679, "top_p": 0.8525818260219942}, "score": 0.4410912698412699}, {"is_best": false, "iteration": 6, "parameters": {"temperature": 1.3582014302647651, "top_k": 84.57921869582849, "top_p": 0.5031409417508472}, "score": 0.49859126984126995}, {"is_best": false, "iteration": 7, "parameters": {"temperature": 1.0981085272724584, "top_k": 134.30601712104786, "top_p": 0.9029311062742911}, "score": 0.44442460317460314}, {"is_best": true, "iteration": 8, "parameters": {"temperature": 1.0916356504193958, "top_k": 68.74570074665868, "top_p": 0.7847680165739477}, "score": 0.5038690476190476}];
+        const history = [{"is_best": false, "iteration": 1, "parameters": {"temperature": 1.4185055519381338, "top_k": 100.42017032434809, "top_p": 0.9280650096649388}, "score": 0.5015576036945225}, {"is_best": false, "iteration": 2, "parameters": {"temperature": 0.6791907465683904, "top_k": 54.65240896595049, "top_p": 0.7196908946705571}, "score": 0.5173921587345263}, {"is_best": false, "iteration": 3, "parameters": {"temperature": 1.3843717287623631, "top_k": 117.50700883027694, "top_p": 0.8756120906630582}, "score": 0.5161612999528171}, {"is_best": false, "iteration": 4, "parameters": {"temperature": 1.1141937590928348, "top_k": 21.61876367826864, "top_p": 0.7833439793468415}, "score": 0.5211174091580049}, {"is_best": false, "iteration": 5, "parameters": {"temperature": 0.6327131312661468, "top_k": 23.79883692734129, "top_p": 0.6935009063017723}, "score": 0.5163384072256748}, {"is_best": false, "iteration": 6, "parameters": {"temperature": 1.1292759363871347, "top_k": 142.25312717856866, "top_p": 0.6078777503764865}, "score": 0.5562640833770112}, {"is_best": false, "iteration": 7, "parameters": {"temperature": 1.017116934594749, "top_k": 85.20487520161345, "top_p": 0.6287105491310268}, "score": 0.5158730125383487}, {"is_best": false, "iteration": 8, "parameters": {"temperature": 1.2563082245845432, "top_k": 130.89886450857247, "top_p": 0.8559539765950248}, "score": 0.5142362246401966}, {"is_best": false, "iteration": 9, "parameters": {"temperature": 1.0519314342165633, "top_k": 31.801975928752864, "top_p": 0.7789420229749019}, "score": 0.505781594866734}, {"is_best": false, "iteration": 10, "parameters": {"temperature": 1.1325911052245488, "top_k": 93.70937477544715, "top_p": 0.594428403065114}, "score": 0.5218678015759324}, {"is_best": true, "iteration": 11, "parameters": {"temperature": 1.0857121772919545, "top_k": 99.20452349194485, "top_p": 0.585732901998774}, "score": 0.5580469880827578}];
         window.optimizationChart = new Chart(document.getElementById('optimizationChart').getContext('2d'), {
             type: 'line',
             data: {
@@ -863,6 +891,48 @@
                     </div>
                 </div>
 
+                <!-- ROUGE Score -->
+                <div class="glossary-item">
+                    <h3 class="glossary-term" data-i18n="glossaryRougeTitle">ROUGE Score</h3>
+                    <div class="glossary-content">
+                        <p><strong data-i18n="glossaryDef">定義：</strong><span data-i18n="glossaryRougeDef">一種用於評估自動摘要和機器翻譯品質的指標。它通過比較模型生成的摘要與專家撰寫的參考摘要之間的重疊詞語（如n-grams）來計算分數。</span></p>
+                        <div class="glossary-details">
+                            <div class="detail-item">
+                                <span class="detail-label" data-i18n="glossaryRougeDetailLabel">常見變體 (ROUGE-L):</span>
+                                <span class="detail-text" data-i18n="glossaryRougeDetailText">ROUGE-L 基於最長公共子序列（LCS），能夠捕捉句子級別的結構相似性。分數越高，表示摘要的品質越接近人類水準。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BLEU Score -->
+                <div class="glossary-item">
+                    <h3 class="glossary-term" data-i18n="glossaryBleuTitle">BLEU Score</h3>
+                    <div class="glossary-content">
+                        <p><strong data-i18n="glossaryDef">定義：</strong><span data-i18n="glossaryBleuDef">另一種廣泛用於評估機器翻譯和文本生成品質的指標。它測量模型生成文本與一組高品質參考文本之間的相似度，特別關注詞語和短語的精確率。</span></p>
+                        <div class="glossary-details">
+                            <div class="detail-item">
+                                <span class="detail-label" data-i18n="glossaryBleuDetailLabel">分數意義:</span>
+                                <span class="detail-text" data-i18n="glossaryBleuDetailText">分數越高（通常在0到1之間），表示生成文本的流暢度和忠實度越高。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HumanEval (Pass@1) -->
+                <div class="glossary-item">
+                    <h3 class="glossary-term" data-i18n="glossaryPassAt1Title">HumanEval (Pass@1)</h3>
+                    <div class="glossary-content">
+                        <p><strong data-i18n="glossaryDef">定義：</strong><span data-i18n="glossaryPassAt1Def">一個專門用於評估程式碼生成模型能力的基準測試。Pass@1 指標表示模型為每個問題生成一次程式碼時，能夠成功通過所有單元測試的比例。</span></p>
+                        <div class="glossary-details">
+                            <div class="detail-item">
+                                <span class="detail-label" data-i18n="glossaryPassAt1DetailLabel">分數意義:</span>
+                                <span class="detail-text" data-i18n="glossaryPassAt1DetailText">這是一個非常嚴格的指標。分數越高，代表模型生成的程式碼的正確性和實用性越強。例如，0.5 的 Pass@1 意味著模型有50%的機率一次性生成完全正確的程式碼。</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
@@ -1051,7 +1121,19 @@
                 glossaryEarlyStoppingPurpose: "Purpose:",
                 glossaryEarlyStoppingPurposeText: "Save computing resources and time, avoiding ineffective tests.",
                 glossaryEarlyStoppingTrigger: "Trigger Condition:",
-                glossaryEarlyStoppingTriggerText: "No significant improvement for several consecutive iterations, or a preset stopping condition is met."
+                glossaryEarlyStoppingTriggerText: "No significant improvement for several consecutive iterations, or a preset stopping condition is met.",
+                glossaryRougeTitle: "ROUGE Score",
+                glossaryRougeDef: "A metric for evaluating automatic summarization and machine translation. It works by comparing an automatically produced summary or translation against a set of reference summaries (typically human-written).",
+                glossaryRougeDetailLabel: "Common Variant (ROUGE-L):",
+                glossaryRougeDetailText: "ROUGE-L is based on the Longest Common Subsequence (LCS), which captures sentence-level structure similarity. A higher score indicates the quality of the summary is closer to human level.",
+                glossaryBleuTitle: "BLEU Score",
+                glossaryBleuDef: "Another widely used metric for evaluating the quality of text which has been machine-translated. It measures the similarity of the machine-translated text to a set of high-quality reference translations.",
+                glossaryBleuDetailLabel: "Score Meaning:",
+                glossaryBleuDetailText: "The higher the score (typically between 0 and 1), the higher the fluency and fidelity of the generated text.",
+                glossaryPassAt1Title: "HumanEval (Pass@1)",
+                glossaryPassAt1Def: "A benchmark specifically for evaluating the capabilities of code generation models. The Pass@1 metric indicates the percentage of problems for which the model generates at least one correct solution that passes all unit tests.",
+                glossaryPassAt1DetailLabel: "Score Meaning:",
+                glossaryPassAt1DetailText: "This is a very strict metric. A higher score represents stronger correctness and utility of the generated code. For example, a Pass@1 of 0.5 means the model has a 50% chance of generating a completely correct code solution in one attempt."
             },
             'zh-TW': {
                 pageTitle: "增強的 Ollama Auto-Tuner 報告",
@@ -1150,7 +1232,19 @@
                 glossaryEarlyStoppingPurpose: "目的：",
                 glossaryEarlyStoppingPurposeText: "節省計算資源和時間，避免無效的測試。",
                 glossaryEarlyStoppingTrigger: "觸發條件：",
-                glossaryEarlyStoppingTriggerText: "連續多次迭代沒有顯著改善，或已達到預設的停止條件。"
+                glossaryEarlyStoppingTriggerText: "連續多次迭代沒有顯著改善，或已達到預設的停止條件。",
+                glossaryRougeTitle: "ROUGE 分數",
+                glossaryRougeDef: "一種用於評估自動摘要和機器翻譯品質的指標。它通過比較模型生成的摘要與專家撰寫的參考摘要之間的重疊詞語（如n-grams）來計算分數。",
+                glossaryRougeDetailLabel: "常見變體 (ROUGE-L):",
+                glossaryRougeDetailText: "ROUGE-L 基於最長公共子序列（LCS），能夠捕捉句子級別的結構相似性。分數越高，表示摘要的品質越接近人類水準。",
+                glossaryBleuTitle: "BLEU 分數",
+                glossaryBleuDef: "另一種廣泛用於評估機器翻譯和文本生成品質的指標。它測量模型生成文本與一組高品質參考文本之間的相似度，特別關注詞語和短語的精確率。",
+                glossaryBleuDetailLabel: "分數意義:",
+                glossaryBleuDetailText: "分數越高（通常在0到1之間），表示生成文本的流暢度和忠實度越高。",
+                glossaryPassAt1Title: "HumanEval (Pass@1)",
+                glossaryPassAt1Def: "一個專門用於評估程式碼生成模型能力的基準測試。Pass@1 指標表示模型為每個問題生成一次程式碼時，能夠成功通過所有單元測試的比例。",
+                glossaryPassAt1DetailLabel: "分數意義:",
+                glossaryPassAt1DetailText: "這是一個非常嚴格的指標。分數越高，代表模型生成的程式碼的正確性和實用性越強。例如，0.5 的 Pass@1 意味著模型有50%的機率一次性生成完全正確的程式碼。"
             }
         };
 

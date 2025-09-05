@@ -21,6 +21,11 @@ seaborn>=0.12.0
 # Convenience for data handling (used in some helpers/reports)
 pandas>=1.5.0
 
+# Dependencies for advanced evaluation metrics
+evaluate>=0.4.0
+rouge_score>=0.1.2
+human-eval>=1.0.0
+
 # Notes:
 # - The project uses Flask-SocketIO in "threading" mode by default, so eventlet/gevent
 #   are not required. If you change async mode to "eventlet" or "gevent", install them.

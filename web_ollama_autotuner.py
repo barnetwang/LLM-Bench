@@ -7,7 +7,8 @@ import time
 import threading
 import argparse
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import Dict, Any, List
+import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
@@ -27,6 +28,22 @@ logging.basicConfig(
 )
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
+
+def convert_numpy_types(obj):
+    """遞迴地將物件中的 NumPy 型別轉換為 Python 原生型別，以便 JSON 序列化。"""
+    if isinstance(obj, dict):
+        return {k: convert_numpy_types(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy_types(i) for i in obj]
+    elif isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, np.bool_):
+        return bool(obj)
+    return obj
 
 class WebIntegratedTuner:
     def __init__(self, host='0.0.0.0', port=5000):
@@ -155,9 +172,15 @@ class WebIntegratedTuner:
                     self.web_ui.add_log_message('info', f"模型 '{model_name}' 的調校已中斷。")
                     break
 
-                if result and result != "incompatible": self.all_results.append(result); self.web_ui.add_tuning_result(result)
-                elif result == "incompatible": self.web_ui.add_log_message('warning', f"模型 '{model_name}' 不支援生成功能")
-                else: self.web_ui.add_log_message('error', f"模型 '{model_name}' 調校失敗")
+                if result and result != "incompatible":
+                    # 修正: 在發送到前端前，轉換 NumPy 型別
+                    cleaned_result = convert_numpy_types(result)
+                    self.all_results.append(cleaned_result)
+                    self.web_ui.add_tuning_result(cleaned_result)
+                elif result == "incompatible": 
+                    self.web_ui.add_log_message('warning', f"模型 '{model_name}' 不支援生成功能")
+                else: 
+                    self.web_ui.add_log_message('error', f"模型 '{model_name}' 調校失敗")
 
             if self.is_tuning: self.web_ui.set_status('completed', "所有模型調校完成")
             else: self.web_ui.set_status('stopped', "調校已停止")

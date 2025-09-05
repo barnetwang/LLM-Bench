@@ -13,19 +13,18 @@ from queue import Empty
 from src.utils.memory_monitor import get_memory_monitor
 from src.utils.cache_manager import get_cache_manager
 from src.models.bayesian_optimizer import create_optimizer_for_quality_tuning, AdaptiveBayesianOptimizer
-from src.core.enhanced_evaluator import get_enhanced_evaluator, get_evaluation_dataset
-from evaluation_dataset import HALLUCINATION_EVAL_SET, LONG_CONTEXT_PERFORMANCE_PROMPT
+from src.core.new_enhanced_evaluator import get_enhanced_evaluator, NEW_EVAL_LIBS_AVAILABLE
+from evaluation_dataset import HALLUCINATION_EVAL_SET, SUMMARIZATION_EVAL_SET, LONG_CONTEXT_PERFORMANCE_PROMPT
+
+# 嘗試從 human_eval 匯入，如果失敗也沒關係，後續有邏輯處理
+try:
+    from human_eval.data import read_problems
+    HUMAN_EVAL_AVAILABLE = NEW_EVAL_LIBS_AVAILABLE
+except ImportError:
+    HUMAN_EVAL_AVAILABLE = False
 
 class EnhancedOllamaTuner:  
-    def __init__(self, model_name: str, constraints: Optional[Dict] = None, stop_event: Optional[threading.Event] = None): # <<< 修改這一行
-        """
-        初始化增強調校器
-        
-        Args:
-            model_name: 模型名稱
-            constraints: 約束條件
-            stop_event: 用於從外部停止執行的 threading.Event
-        """
+    def __init__(self, model_name: str, constraints: Optional[Dict] = None, stop_event: Optional[threading.Event] = None):
         self.model_name = model_name
         self.constraints = constraints or {
             "time_limit_s": 60.0,
@@ -37,7 +36,6 @@ class EnhancedOllamaTuner:
         self.memory_monitor = get_memory_monitor()
         self.cache_manager = get_cache_manager()
         self.evaluator = get_enhanced_evaluator()
-        self.evaluation_dataset = get_evaluation_dataset()
         self.optimizer = create_optimizer_for_quality_tuning()
         self.best_settings = {}
         self.current_process = None
@@ -92,56 +90,84 @@ class EnhancedOllamaTuner:
         self.cache_manager.set(self.model_name, parameters, result)
     
     def _evaluate_quality_comprehensive(self, settings: Dict) -> Dict[str, float]:
+        self.logger.info(f"開始對設定進行全面品質評估: {settings}")
+        
+        all_eval_items = HALLUCINATION_EVAL_SET + SUMMARIZATION_EVAL_SET
+        
+        if HUMAN_EVAL_AVAILABLE:
+            try:
+                human_eval_problems = read_problems()
+                first_problem_key = next(iter(human_eval_problems))
+                first_problem = human_eval_problems[first_problem_key]
+                
+                # 修正: 直接使用從函式庫讀取出的 problem dict，只額外加入 task_type
+                first_problem['task_id'] = first_problem_key
+                first_problem['task_type'] = 'coding'
+                first_problem['id'] = first_problem_key # 確保 id 欄位也存在
+
+                all_eval_items.append(first_problem)
+                self.logger.info(f"已加入 HumanEval 問題 '{first_problem_key}' 進行評估。")
+            except Exception as e:
+                self.logger.error(f"加載 HumanEval 資料集失敗，將跳過程式碼評估。錯誤: {e}")
+
         scores = []
-        evaluations = []
-        test_prompt = "請回答：1+1等於多少？"
+        all_detailed_evaluations = []
+        
         test_settings = settings.copy()
         test_settings['stream'] = False
-        
+
+        test_prompt = "請回答：1+1等於多少？"
         answer, status = self._safe_generate(test_prompt, test_settings, timeout=30.0)
-        
-        if status != "success" or "does not support generate" in str(answer):
-            return {"overall": 0.0, "hallucination": 0.0, "error": "incompatible"}
-        for item in HALLUCINATION_EVAL_SET:
-            prompt = f"請參考以下資訊來回答問題。\n\n上下文：{item['context']}\n\n問題：{item['question']}"
+        if status != "success" or (isinstance(answer, str) and "does not support generate" in answer):
+            return {"overall": 0.0, "error": "incompatible"}
+
+        for item in all_eval_items:
+            task_type = item.get("task_type")
+            prompt = ""
             
-            answer, status = self._safe_generate(prompt, test_settings, timeout=60.0)
+            if task_type == "hallucination":
+                prompt = f"請參考以下資訊來回答問題。\n\n上下文：{item['context']}\n\n問題：{item['question']}"
+            elif task_type == "summarization":
+                prompt = f"請總結以下文章：\n\n{item['source_text']}"
+            elif task_type == "coding":
+                prompt = item['prompt']
+            else:
+                self.logger.warning(f"未知的任務類型 '{task_type}'，跳過評估項目 '{item['id']}'")
+                continue
+
+            answer, status = self._safe_generate(prompt, test_settings, timeout=120.0)
             
             if status == "success" and isinstance(answer, str):
-                evaluation = self.evaluator.comprehensive_evaluation(
-                    context=item['context'],
-                    question=item['question'],
-                    answer=answer,
-                    ground_truth_keywords=item['ground_truth_keywords']
-                )
-                evaluations.append(evaluation)
-                scores.append(evaluation['overall'])
+                evaluation = self.evaluator.comprehensive_evaluation(item, answer)
+                all_detailed_evaluations.append(evaluation)
+                scores.append(evaluation.get('overall', 0.0))
             else:
                 self.logger.warning(f"評估項目 '{item['id']}' 失敗 ({status})")
                 scores.append(0.0)
         
         if not scores:
-            return {"overall": 0.0, "hallucination": 0.0, "error": "no_valid_tests"}
+            return {"overall": 0.0, "error": "no_valid_tests"}
+
         avg_score = sum(scores) / len(scores)
-        avg_evaluation = {}
-        if evaluations:
-            for key in evaluations[0].keys():
+        
+        final_detailed_eval = {}
+        if all_detailed_evaluations:
+            all_keys = set()
+            for e in all_detailed_evaluations:
+                all_keys.update(e.keys())
+            
+            for key in all_keys:
                 if key != 'overall':
-                    avg_evaluation[key] = sum(e[key] for e in evaluations) / len(evaluations)
+                    key_scores = [e[key] for e in all_detailed_evaluations if key in e]
+                    if key_scores:
+                        final_detailed_eval[key] = sum(key_scores) / len(key_scores)
+
+        final_detailed_eval['overall'] = avg_score
         
-        result = {
-            "overall": avg_score,
-            "hallucination": avg_evaluation.get('hallucination', 0.0),
-            "relevance": avg_evaluation.get('relevance', 0.0),
-            "logical_consistency": avg_evaluation.get('logical_consistency', 0.0),
-            "factual_accuracy": avg_evaluation.get('factual_accuracy', 0.0),
-            "creativity": avg_evaluation.get('creativity', 0.0),
-            "multilingual_support": avg_evaluation.get('multilingual_support', 0.0),
-            "completeness": avg_evaluation.get('completeness', 0.0),
-            "fluency": avg_evaluation.get('fluency', 0.0)
-        }
-        
-        return result
+        result_for_optimizer = {"overall": avg_score}
+        result_for_optimizer.update(final_detailed_eval)
+
+        return result_for_optimizer
     
     def tune_quality_bayesian(self) -> str:
         self.logger.info("開始貝葉斯優化品質調校")
