@@ -30,7 +30,6 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 def convert_numpy_types(obj):
-    """遞迴地將物件中的 NumPy 型別轉換為 Python 原生型別，以便 JSON 序列化。"""
     if isinstance(obj, dict):
         return {k: convert_numpy_types(v) for k, v in obj.items()}
     elif isinstance(obj, list):
